@@ -1,1 +1,2 @@
 spring.application.name: freyr
+server.port: 8081

@@ -1,8 +1,10 @@
 version: '3.8'
 services:
-  app:
-    container_name: branch-app
+  freya:
+    container_name: branch-freya
     image: eclipse-temurin:17-jdk-alpine
+    ports:
+      - '9090:8080'
     volumes:
       - .:/app
       - ${HOME}/.gradle:/app/.gradle
@@ -10,4 +12,38 @@ services:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
     privileged: true
-    command: './gradlew clean build -Dspring.profiles.active=integrationtest --project-cache-dir=/tmp --no-daemon test --info'
+    command: './gradlew freya:clean freya:build -Dspring.profiles.active=functionaltest --project-cache-dir=/tmp --no-daemon test --info'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  freyr:
+    container_name: branch-freyr
+    image: eclipse-temurin:17-jdk-alpine
+    depends_on:
+      freya:
+        condition: service_healthy
+    ports:
+      - '9091:8081'
+    volumes:
+      - .:/app
+      - ${HOME}/.gradle:/app/.gradle
+    environment:
+      - GRADLE_USER_HOME=${HOME}/.gradle
+    working_dir: /app
+    privileged: true
+    command: './gradlew freyr:clean freyr:test -Dspring.profiles.active=functionaltest --project-cache-dir=/tmp --no-daemon test --info'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  healthcheck:
+    image: appropriate/curl
+    command: [ "curl", "-f", "http://freya:8080/actuator/health", "&&", "curl", "-f", "http://freyr:8081/actuator/health" ]
+    depends_on:
+      freya:
+        condition: service_started
+      freyr:
+        condition: service_started

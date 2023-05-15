@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} testing project freya
 on:
   push:
     paths:
-#      - 'freya/**'
+      - 'freya/**'
 jobs:
   test:
     uses: ./.github/workflows/push.yml
