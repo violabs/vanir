@@ -4,10 +4,10 @@ services:
     container_name: branch-app
     image: eclipse-temurin:17-jdk-alpine
     volumes:
-      - .:/app
+      - ../.:/app
       - ${HOME}/.gradle:/app/.gradle
     environment:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
     privileged: true
-    command: './gradlew clean build -Dspring.profiles.active=integrationtest --project-cache-dir=/tmp --no-daemon test --info'
+    command: './gradlew freya:clean freya:build -Dspring.profiles.active=integrationtest --project-cache-dir=/tmp --no-daemon test --info'
