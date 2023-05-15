@@ -6,8 +6,6 @@ services:
     volumes:
       - .:/app
       - ${HOME}/.gradle:/app/.gradle
-    depends_on:
-      - branch-db
     environment:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
