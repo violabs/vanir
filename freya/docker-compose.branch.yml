@@ -3,6 +3,8 @@ services:
   app:
     container_name: branch-app
     image: eclipse-temurin:17-jdk-alpine
+    depends_on:
+      - freya-postgres
     volumes:
       - ../.:/app
       - ${HOME}/.gradle:/app/.gradle
@@ -11,3 +13,13 @@ services:
     working_dir: /app
     privileged: true
     command: './gradlew freya:clean freya:build -Dspring.profiles.active=integrationtest --project-cache-dir=/tmp --no-daemon test --info'
+
+  freya-postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: freya_db

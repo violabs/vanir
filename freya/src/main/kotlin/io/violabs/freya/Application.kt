@@ -2,9 +2,11 @@ package io.violabs.freya
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 
 @SpringBootApplication
-class Application
+@EnableR2dbcRepositories
+open class Application
 
 fun main(args: Array<String>) {
     runApplication<Application>(*args)

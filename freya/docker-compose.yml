@@ -1,1 +1,11 @@
 version: '3.8'
+services:
+  freya-postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: freya_db

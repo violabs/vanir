@@ -7,15 +7,13 @@ plugins {
 	kotlin("plugin.spring") version "1.7.22"
 }
 
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-}
-
 allprojects {
 	group = "io.violabs"
 	version = "0.0.1-SNAPSHOT"
+
+	repositories {
+		mavenCentral()
+	}
 
 	tasks.withType<JavaCompile> {
 		sourceCompatibility = JavaVersion.VERSION_17.majorVersion
@@ -39,14 +37,30 @@ allprojects {
 
 		useJUnitPlatform()
 	}
+
 }
 
 subprojects {
-	repositories {
-		mavenCentral()
+	apply {
+		plugin("org.springframework.boot")
+		plugin("io.spring.dependency-management")
+		plugin("org.jetbrains.kotlin.jvm")
 	}
 
-	apply {
-		plugin("io.spring.dependency-management")
+	when (name) {
+		"freya", "freyr" -> {
+			dependencies {
+				implementation(project(":core"))
+				implementation("org.springframework.boot:spring-boot-starter-actuator")
+				implementation("org.springframework.boot:spring-boot-starter-webflux")
+				implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+				implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+				implementation("org.jetbrains.kotlin:kotlin-reflect")
+				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+				annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+				testImplementation("org.springframework.boot:spring-boot-starter-test")
+				testImplementation("io.projectreactor:reactor-test")
+			}
+		}
 	}
 }
