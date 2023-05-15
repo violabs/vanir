@@ -33,7 +33,7 @@ services:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
     privileged: true
-    command: './gradlew freyr:clean freyr:test -Dspring.profiles.active=functionaltest --project-cache-dir=/tmp --no-daemon test --info'
+    command: './gradlew freyr:clean freyr:build -Dspring.profiles.active=functionaltest --project-cache-dir=/tmp --no-daemon test --info'
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
       interval: 30s
