@@ -28,4 +28,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-reports
-          path: build/reports/
+          path: |
+            freya/build/reports/tests/test/
+            freyr/build/reports/tests/test/
