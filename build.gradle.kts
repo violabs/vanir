@@ -50,6 +50,7 @@ subprojects {
 	when (name) {
 		"freya", "freyr" -> {
 			dependencies {
+				implementation(project(":core"))
 				implementation("org.springframework.boot:spring-boot-starter-actuator")
 				implementation("org.springframework.boot:spring-boot-starter-webflux")
 				implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

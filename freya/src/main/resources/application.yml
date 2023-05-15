@@ -1,3 +1,10 @@
-spring.application.name: freya
 
 management.endpoint.health.enabled: true
+
+spring:
+  application:
+    name: freya
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/freya_db
+    username: admin
+    password: password
