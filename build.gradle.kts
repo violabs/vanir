@@ -13,6 +13,7 @@ allprojects {
 
 	repositories {
 		mavenCentral()
+		maven { url = uri("https://jitpack.io") }
 	}
 
 	tasks.withType<JavaCompile> {
@@ -47,6 +48,10 @@ subprojects {
 		plugin("org.jetbrains.kotlin.jvm")
 	}
 
+	dependencies {
+
+	}
+
 	when (name) {
 		"freya", "freyr" -> {
 			dependencies {
@@ -58,6 +63,7 @@ subprojects {
 				implementation("org.jetbrains.kotlin:kotlin-reflect")
 				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 				annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")
 				testImplementation("io.projectreactor:reactor-test")
 			}
