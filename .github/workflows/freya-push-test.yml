@@ -1,0 +1,12 @@
+name: Test Freya Code
+run-name: ${{ github.actor }} testing project freya
+on:
+  push:
+    paths:
+      - 'freya/**'
+jobs:
+  test:
+    uses: ./.github/workflows/push.yml
+    with:
+      # Pass the docker-compose file path as an input to the shared workflow
+      compose-file-path: freya/docker-compose.branch.yml

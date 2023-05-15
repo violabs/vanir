@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  freya:
+    container_name: branch-freya
+    image: eclipse-temurin:17-jdk-alpine
+    ports:
+      - '9090:8080'
+    volumes:
+      - .:/app
+      - ${HOME}/.gradle:/app/.gradle
+    environment:
+      - GRADLE_USER_HOME=${HOME}/.gradle
+    working_dir: /app
+    privileged: true
+    command: './gradlew freya:clean freya:build -Dspring.profiles.active=e2e --project-cache-dir=/tmp --no-daemon test --info'
+  freyr:
+    container_name: branch-freyr
+    image: eclipse-temurin:17-jdk-alpine
+    ports:
+      - '9091:8081'
+    volumes:
+      - .:/app
+      - ${HOME}/.gradle:/app/.gradle
+    environment:
+      - GRADLE_USER_HOME=${HOME}/.gradle
+    working_dir: /app
+    privileged: true
+    command: './gradlew freyr:clean freyr:build -Dspring.profiles.active=e2e --project-cache-dir=/tmp --no-daemon test --info'
