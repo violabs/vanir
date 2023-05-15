@@ -17,7 +17,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Execute Gradle build
-        run: ./gradlew build -x test --scan
+        run: ./gradlew build -x test --stacktrace
 
       - name: Run Docker Compose file
         run: docker compose -f docker-compose.branch.yml up --build -d
