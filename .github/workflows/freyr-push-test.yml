@@ -1,0 +1,12 @@
+name: Test Freyr Code
+run-name: ${{ github.actor }} testing project freyr
+on:
+  push:
+    paths:
+      - 'freyr/**'
+jobs:
+  test:
+    uses: ./.github/workflows/shared-steps.yml
+    with:
+      # Pass the docker-compose file path as an input to the shared workflow
+      compose-file-path: freyr/docker-compose.branch.yml
