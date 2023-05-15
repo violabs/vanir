@@ -1,11 +1,11 @@
-package io.violabs.vanir
+package io.violabs.freya
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class VanirApplication
+class Application
 
 fun main(args: Array<String>) {
-	runApplication<VanirApplication>(*args)
+    runApplication<Application>(*args)
 }
