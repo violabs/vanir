@@ -66,6 +66,7 @@ subprojects {
 				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")
 				testImplementation("io.projectreactor:reactor-test")
+				testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 			}
 		}
 	}

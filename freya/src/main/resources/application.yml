@@ -1,5 +1,9 @@
 
-management.endpoint.health.enabled: true
+management:
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
 
 spring:
   application:
