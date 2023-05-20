@@ -25,7 +25,7 @@ class UserTest : Wesley() {
             TestVariables.objectMapper.readValue(json)
         }
 
-        whenever { User() }
+        whenever { AppUser() }
     }
 
     @Test
@@ -46,7 +46,7 @@ class UserTest : Wesley() {
         }
 
         whenever {
-            User(
+            AppUser(
                 username = "username",
                 firstname = "firstname",
                 lastname = "lastname",
