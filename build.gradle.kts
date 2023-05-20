@@ -61,7 +61,11 @@ subprojects {
 				implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 				implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 				implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
 				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
 				annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")
