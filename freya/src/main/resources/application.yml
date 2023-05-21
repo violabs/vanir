@@ -8,6 +8,10 @@ management:
 spring:
   application:
     name: freya
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:39092
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/freya_db
     username: admin
