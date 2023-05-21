@@ -1,5 +1,8 @@
 package io.violabs.freya.service
 
+import io.violabs.freya.TestVariables
+import io.violabs.freya.TestVariables.MAIN_USER
+import io.violabs.freya.TestVariables.PRE_SAVED_USER
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -12,65 +15,41 @@ import org.springframework.context.annotation.Import
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.r2dbc.core.awaitOneOrNull
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 
 @DataR2dbcTest
 @Import(UserService::class)
 @ExtendWith(SpringExtension::class)
-class UserRepositoryTest(
+class UserServiceIntegrationTest(
     @Autowired val userService: UserService,
     @Autowired val dbClient: DatabaseClient
 ) {
-    private val createAppUserTableQuery = """
-        CREATE TABLE IF NOT EXISTS app_user (
-            id SERIAL PRIMARY KEY,
-            username VARCHAR(255) NOT NULL,
-            firstname VARCHAR(255) NOT NULL,
-            lastname VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
-            date_of_birth TIMESTAMP,
-            join_date TIMESTAMP
-        );
-    """.trimIndent()
-
-    private val mainUser = AppUser(
-        id = 1,
-        username = "testuser",
-        firstname = "Test",
-        lastname = "User",
-        email = "testuser@test.com",
-        dateOfBirth = LocalDate.now().minusYears(20),
-        joinDate = LocalDate.now()
-    )
-
-    private val preSavedUser = mainUser.copy(id = null)
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        dbClient.sql("DROP TABLE IF EXISTS app_user").fetch().awaitOneOrNull()
-        dbClient.sql(createAppUserTableQuery).fetch().awaitOneOrNull()
+        dbClient.sql(TestVariables.DROP_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
+        dbClient.sql(TestVariables.CREATE_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
     }
 
     @Test
     fun `createUser will add a user successfully`() = runBlocking {
         //when
-        val actual: AppUser = userService.createUser(preSavedUser)
+        val actual: AppUser = userService.createUser(PRE_SAVED_USER)
 
         println(actual)
 
         //then
-        assertEquals(mainUser, actual)
+        assertEquals(MAIN_USER, actual)
     }
 
     @Test
     fun `updateUser will update a user successfully`() = runBlocking {
         //setup
-        val createdId = userService.createUser(preSavedUser).id!!
+        val createdId = userService.createUser(PRE_SAVED_USER).id!!
 
         println("CREATED: $createdId")
 
         //given
-        val expected: AppUser = mainUser.copy(email = "newtestuser@test.com")
+        val expected: AppUser = MAIN_USER.copy(email = "newtestuser@test.com")
 
         //when
         val actual: AppUser = userService.updateUser(expected)
@@ -91,7 +70,7 @@ class UserRepositoryTest(
     @Test
     fun `getUserById gets the user when it exists`() = runBlocking {
         //setup
-        val createdId = userService.createUser(preSavedUser).id!!
+        val createdId = userService.createUser(PRE_SAVED_USER).id!!
 
         println("CREATED: $createdId")
 
@@ -99,13 +78,13 @@ class UserRepositoryTest(
         val found: AppUser? = userService.getUserById(createdId)
 
         //then
-        assertEquals(mainUser.copy(id = createdId), found!!)
+        assertEquals(MAIN_USER.copy(id = createdId), found!!)
     }
 
     @Test
     fun `getAllUsers will get a flow of users`() = runBlocking {
         //setup
-        (0..2).map { userService.createUser(preSavedUser) }.also {
+        (0..2).map { userService.createUser(PRE_SAVED_USER) }.also {
             println("CREATED IDS: $it")
         }
 
@@ -113,13 +92,13 @@ class UserRepositoryTest(
         val found: List<AppUser> = userService.getAllUsers().toList()
 
         //then
-        assertEquals(listOf(mainUser.copy(id = 1), mainUser.copy(id = 2), mainUser.copy(id = 3)), found)
+        assertEquals(listOf(MAIN_USER.copy(id = 1), MAIN_USER.copy(id = 2), MAIN_USER.copy(id = 3)), found)
     }
 
     @Test
     fun `deleteUserById will delete the user`() = runBlocking {
         //setup
-        val createdId = userService.createUser(preSavedUser).id!!
+        val createdId = userService.createUser(PRE_SAVED_USER).id!!
 
         println("CREATED: $createdId")
 
