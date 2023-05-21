@@ -2,13 +2,9 @@ package io.violabs.freya.controller
 
 import io.violabs.freya.domain.AppUser
 import io.violabs.freya.service.UserService
+import kotlinx.coroutines.flow.Flow
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,4 +16,13 @@ class UserController(private val userService: UserService) {
 
     @PutMapping
     suspend fun updateUser(@RequestBody user: AppUser): AppUser = userService.updateUser(user)
+
+    @GetMapping("/{id}")
+    suspend fun getUserById(@PathVariable id: Long): AppUser? = userService.getUserById(id)
+
+    @GetMapping
+    fun getAllUsers(): Flow<AppUser> = userService.getAllUsers()
+
+    @DeleteMapping("/{id}")
+    suspend fun deleteUserById(@PathVariable id: Long): Boolean = userService.deleteUserById(id)
 }

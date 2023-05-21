@@ -95,4 +95,51 @@ class UserControllerFunctionalTest(
             .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
             .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
     }
+
+    @Test
+    fun `getUserById will get user when it exists`() {
+        //setup
+        val createdId = runBlocking {
+            userService.createUser(TestVariables.PRE_SAVED_USER).id!!
+        }
+
+        //given
+        client
+            .get()
+            .uri("/api/users/$createdId")
+            .exchange()
+            .expectStatus().is2xxSuccessful
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(createdId)
+            .jsonPath("$.username").isEqualTo("testuser")
+            .jsonPath("$.firstname").isEqualTo("Test")
+            .jsonPath("$.lastname").isEqualTo("User")
+            .jsonPath("$.email").isEqualTo("testuser@test.com")
+            .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
+            .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
+    }
+
+    @Test
+    fun `getUserById will return not found when user does not exist`() {
+        client
+            .get()
+            .uri("/api/users/1")
+            .exchange()
+            .expectStatus().isNotFound
+    }
+
+    @Test
+    fun `deleteUserById will delete user when it exists`() {
+        //setup
+        val createdId = runBlocking {
+            userService.createUser(TestVariables.PRE_SAVED_USER).id!!
+        }
+
+        //given
+        client
+            .delete()
+            .uri("/api/users/$createdId")
+            .exchange()
+            .expectStatus().is2xxSuccessful
+    }
 }
