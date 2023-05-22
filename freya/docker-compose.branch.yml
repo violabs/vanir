@@ -10,6 +10,7 @@ services:
     volumes:
       - ../.:/app
       - ${HOME}/.gradle:/app/.gradle
+      - ./build/reports:/app/build/reports
     environment:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app

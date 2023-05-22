@@ -29,8 +29,6 @@ allprojects {
 	}
 
 	tasks.withType<Test> {
-		systemProperty("spring.profiles.active", "test")
-
 		reports {
 			html.required.set(true)
 			junitXml.required.set(true)
@@ -74,7 +72,8 @@ subprojects {
 				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")
 				testImplementation("io.projectreactor:reactor-test")
-				testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+//				testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+				testImplementation("io.mockk:mockk:1.13.5")
 				testImplementation("org.springframework.kafka:spring-kafka-test")
 			}
 		}

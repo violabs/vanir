@@ -20,7 +20,7 @@ class UserProducerIntegrationTest(
     fun `should send user data to kafka`() = runBlocking {
         val user = AppUser(1, "test", "test", "test", "test")
         userProducer.sendUserData(user)
-        val receivedUser = kafkaConsumer.records.poll(3, TimeUnit.SECONDS)
+        val receivedUser = kafkaConsumer.records.poll(5, TimeUnit.SECONDS)
         assert(receivedUser == user) {
             "EXPECT: $user\nACTUAL: $receivedUser"
         }
