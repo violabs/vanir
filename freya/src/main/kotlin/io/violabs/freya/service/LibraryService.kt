@@ -19,4 +19,10 @@ class LibraryService(private val libraryRepository: LibraryRepository) {
             .findById(id)
             ?.toDto()
     }
+
+    suspend fun getLibraryByUserId(userId: Long): Library? {
+        return libraryRepository
+            .findByUserId(userId)
+            ?.toDto()
+    }
 }

@@ -32,7 +32,7 @@ class LibraryServiceIntegrationTest(
     }
 
     @Test
-    fun `createLibrary will add a user successfully`() = runBlocking {
+    fun `createLibrary will add a library successfully`() = runBlocking {
         // given
         val preSavedLibrary = PRE_SAVED_LIBRARY.copy().also {
             it.book = TestVariables.MAIN_BOOK
@@ -58,7 +58,7 @@ class LibraryServiceIntegrationTest(
     }
 
     @Test
-    fun `getLibraryById gets the user when it exists`() = runBlocking {
+    fun `getLibraryById gets the library when it exists`() = runBlocking {
         //setup
         val createdId = libraryService.createLibrary(PRE_SAVED_LIBRARY).id!!
 
@@ -69,6 +69,20 @@ class LibraryServiceIntegrationTest(
 
         //then
         assertEquals(MAIN_LIBRARY.copy(id = createdId), found!!)
+    }
+
+    @Test
+    fun `getLibraryByUserId gets the user library`() = runBlocking {
+        //setup
+        val library: Library = libraryService.createLibrary(PRE_SAVED_LIBRARY)
+
+        println("CREATED: $library")
+
+        //when
+        val found: Library? = libraryService.getLibraryByUserId(1)
+
+        //then
+        assertEquals(library, found)
     }
 
     private fun <T> assertEquals(expected: T, actual: T) {
