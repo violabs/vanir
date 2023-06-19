@@ -88,6 +88,27 @@ docker compose up -f ./freyr/docker-compose.branch.yml
 docker compose down -f ./freyr/docker-compose.branch.yml
 ```
 
+## TODO
+
+### All
+* [ ] Docker Kafka (network)
+
+### Freya
+* [x] Docker Postgres
+* [x] Postgres DB Setup
+* [x] Endpoint
+* [x] Docker Kafka (individual)
+* [ ] Kafka Consumer
+* [x] Kafka Producer
+
+### Freyr
+* [ ] Docker Redis
+* [x] Postgres DB Setup
+* [x] Endpoint
+* [ ] Docker Kafka (individual)
+* [ ] Kafka Consumer
+* [ ] Kafka Producer
+
 ## References
 
 - [Spring WebFlux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux)

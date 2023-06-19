@@ -22,13 +22,25 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
+      - name: Create reports directory
+        run: mkdir -p build/reports
+
       - name: Run Docker Compose file
         run: docker compose -f ${{ inputs.compose-file-path }} up --build -d
         env:
           GRADLE_USER_HOME: ${{ env.HOME }}/.gradle
 
+      - name: Capture Docker Compose logs
+        run: docker compose -f ${{ inputs.compose-file-path }} logs > docker-compose.log
+
+      - name: Upload Docker Compose logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-compose-logs
+          path: docker-compose.log
+
       - name: Upload build reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: build-reports
           path: build/reports/

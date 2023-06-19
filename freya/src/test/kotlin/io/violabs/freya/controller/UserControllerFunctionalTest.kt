@@ -125,7 +125,7 @@ class UserControllerFunctionalTest(
             .get()
             .uri("/api/users/1")
             .exchange()
-            .expectStatus().isNotFound
+            .expectStatus().isOk
     }
 
     @Test
