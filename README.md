@@ -97,9 +97,9 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 * [x] Docker Postgres
 * [x] Postgres DB Setup
 * [x] Endpoint
-* [ ] Docker Kafka (individual)
+* [x] Docker Kafka (individual)
 * [ ] Kafka Consumer
-* [ ] Kafka Producer
+* [x] Kafka Producer
 
 ### Freyr
 * [ ] Docker Redis

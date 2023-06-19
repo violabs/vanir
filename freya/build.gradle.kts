@@ -19,7 +19,7 @@ dependencyManagement {
 	}
 }
 
-//dockerCompose {
-//	isRequiredBy(tasks.test)
-//	useComposeFiles.set(listOf("docker-compose.yml"))
-//}
+dockerCompose {
+	isRequiredBy(tasks.test)
+	useComposeFiles.set(listOf("docker-compose.yml"))
+}
