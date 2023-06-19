@@ -90,6 +90,8 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 
 ## TODO
 
+Flow - Endpoint to call to reserve a book for 
+
 ### All
 * [ ] Docker Kafka (network)
 
@@ -100,10 +102,12 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 * [x] Docker Kafka (individual)
 * [ ] Kafka Consumer
 * [x] Kafka Producer
+* [ ] Setup Book
+* [ ] Setup HATEOAS message for kafka to call book.
+* [ ] Setup endpoint to make a book reservation that calls to Freyr for reservation info.
 
 ### Freyr
 * [ ] Docker Redis
-* [x] Postgres DB Setup
 * [x] Endpoint
 * [ ] Docker Kafka (individual)
 * [ ] Kafka Consumer
