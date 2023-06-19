@@ -1,6 +1,8 @@
 package io.violabs.freya.config
 
 import io.violabs.freya.domain.AppUser
+import org.apache.kafka.clients.admin.AdminClientConfig
+import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
+import org.springframework.kafka.core.KafkaAdmin
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
@@ -28,6 +31,18 @@ open class KafkaConfig {
     lateinit var bootstrapServers: String
 
     @Bean
+    open fun kafkaAdmin(): KafkaAdmin {
+        val configs: MutableMap<String, Any> = HashMap()
+        configs[AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        return KafkaAdmin(configs)
+    }
+
+    @Bean
+    open fun userTopic(): NewTopic {
+        return NewTopic("user", 1, 1.toShort())
+    }
+
+    @Bean
     open fun producerConfigs(): Map<String, Any> {
         return KafkaProperties()
             .also {
@@ -36,6 +51,7 @@ open class KafkaConfig {
                 producer.bootstrapServers = bootstrapServers.split(",").toList()
                 producer.keySerializer = StringSerializer::class.java
                 producer.valueSerializer = JsonSerializer::class.java
+                producer.acks = "all"
             }
             .buildProducerProperties()
     }
@@ -48,28 +64,30 @@ open class KafkaConfig {
 
                 consumer.bootstrapServers = bootstrapServers.split(",").toList()
                 consumer.keyDeserializer = StringDeserializer::class.java
-                consumer.valueDeserializer = JsonSerializer::class.java
+                consumer.valueDeserializer = JsonDeserializer::class.java
                 consumer.groupId = "json"
+                consumer.autoOffsetReset = "earliest"
+                consumer.properties["spring.json.trusted.packages"] = "io.violabs.freya.domain"
             }
             .buildConsumerProperties()
     }
 
     @Bean
-    open fun producerTemplate(): ReactiveKafkaProducerTemplate<String, Any>? {
+    open fun producerTemplate(): ReactiveKafkaProducerTemplate<String, AppUser> {
         return producerConfigs()
-            .let { SenderOptions.create<String, Any>(it) }
+            .let { SenderOptions.create<String, AppUser>(it) }
             .let { ReactiveKafkaProducerTemplate(it) }
     }
 
     @Bean
-    open fun consumerTemplate(): ReactiveKafkaConsumerTemplate<String, Any>? {
+    open fun consumerTemplate(): ReactiveKafkaConsumerTemplate<String, AppUser> {
         return consumerConfigs()
-            .let { ReceiverOptions.create<String, Any>(it) }
+            .let { ReceiverOptions.create<String, AppUser>(it).subscription(listOf("user")) }
             .let { ReactiveKafkaConsumerTemplate(it) }
     }
 
     @Bean
-    open fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, AppUser>? {
+    open fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, AppUser> {
         val jsonDeserializer = JsonDeserializer<AppUser>()
         jsonDeserializer.addTrustedPackages("io.violabs.freya.domain")
 

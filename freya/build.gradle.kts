@@ -1,3 +1,6 @@
+plugins {
+	id("com.avast.gradle.docker-compose") version "0.16.12"
+}
 
 extra["testcontainersVersion"] = "1.18.1"
 
@@ -15,3 +18,8 @@ dependencyManagement {
 		mavenBom("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}")
 	}
 }
+
+//dockerCompose {
+//	isRequiredBy(tasks.test)
+//	useComposeFiles.set(listOf("docker-compose.yml"))
+//}

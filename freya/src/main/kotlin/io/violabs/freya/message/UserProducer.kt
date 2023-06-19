@@ -9,12 +9,11 @@ import reactor.kafka.sender.SenderResult
 private const val USER_TOPIC = "user"
 
 @Component
-class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, Any>) {
+class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, AppUser>) {
     suspend fun sendUserData(user: AppUser): SenderResult<Void>? {
         return producerTemplate
             .send(USER_TOPIC, user.id.toString(), user)
             .doOnEach { println("Sent user data: $user") }
-            .doOnError { println("Error sending user data: $user") }
             .awaitSingleOrNull()
     }
 }
