@@ -72,7 +72,7 @@ subprojects {
 				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")
 				testImplementation("io.projectreactor:reactor-test")
-//				testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+				implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
 				testImplementation("io.mockk:mockk:1.13.5")
 				testImplementation("org.springframework.kafka:spring-kafka-test")
 			}
