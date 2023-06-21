@@ -1,4 +1,4 @@
-package io.violabs.freya.service
+package io.violabs.freya.service.db
 
 import io.violabs.freya.domain.AppUser
 import io.violabs.freya.repository.UserRepository
@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserDbService(private val userRepository: UserRepository) {
 
     suspend fun createUser(user: AppUser): AppUser = userRepository.save(user)
 

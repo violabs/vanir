@@ -4,8 +4,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import io.violabs.freya.TestVariables
+import io.violabs.freya.TestVariables.User.USER_1
 import io.violabs.freya.message.UserProducer
+import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -13,48 +14,48 @@ import reactor.kafka.sender.SenderResult
 
 class UserEventServiceTest {
     private val userProducer = mockk<UserProducer>()
-    private val userService = mockk<UserService>()
+    private val userDbService = mockk<UserDbService>()
 
-    private val userEventService = UserEventService(userProducer, userService)
+    private val userEventService = UserEventService(userProducer, userDbService)
 
     @Test
     fun `createUser will create the user and send a message`(): Unit = runBlocking {
         //given
         val senderResult = mockk<SenderResult<Void>>()
 
-        coEvery { userService.createUser(TestVariables.MAIN_USER) } returns TestVariables.MAIN_USER
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns senderResult
+        coEvery { userDbService.createUser(USER_1) } returns USER_1
+        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
 
         //when
-        userEventService.createUser(TestVariables.MAIN_USER)
+        userEventService.createUser(USER_1)
 
         //then
         coVerify {
-            userService.createUser(TestVariables.MAIN_USER)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.createUser(USER_1)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
     }
 
     @Test
     fun `createUser will throw an exception if the user is not sent`(): Unit = runBlocking {
         //given
-        coEvery { userService.createUser(TestVariables.MAIN_USER) } returns TestVariables.MAIN_USER
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns null
+        coEvery { userDbService.createUser(USER_1) } returns USER_1
+        coEvery { userProducer.sendUserData(USER_1) } returns null
 
         //when
         val exception = kotlin.runCatching {
-            userEventService.createUser(TestVariables.MAIN_USER)
+            userEventService.createUser(USER_1)
         }.exceptionOrNull()
 
         //then
         coVerify {
-            userService.createUser(TestVariables.MAIN_USER)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.createUser(USER_1)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
 
         assert(exception is IllegalStateException)
     }
@@ -64,39 +65,39 @@ class UserEventServiceTest {
         //given
         val senderResult = mockk<SenderResult<Void>>()
 
-        coEvery { userService.updateUser(TestVariables.MAIN_USER) } returns TestVariables.MAIN_USER
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns senderResult
+        coEvery { userDbService.updateUser(USER_1) } returns USER_1
+        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
 
         //when
-        userEventService.updateUser(TestVariables.MAIN_USER)
+        userEventService.updateUser(USER_1)
 
         //then
         coVerify {
-            userService.updateUser(TestVariables.MAIN_USER)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.updateUser(USER_1)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
     }
 
     @Test
     fun `updateUser will throw an exception if the user is not sent`(): Unit = runBlocking {
         //given
-        coEvery { userService.updateUser(TestVariables.MAIN_USER) } returns TestVariables.MAIN_USER
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns null
+        coEvery { userDbService.updateUser(USER_1) } returns USER_1
+        coEvery { userProducer.sendUserData(USER_1) } returns null
 
         //when
         val exception = kotlin.runCatching {
-            userEventService.updateUser(TestVariables.MAIN_USER)
+            userEventService.updateUser(USER_1)
         }.exceptionOrNull()
 
         //then
         coVerify {
-            userService.updateUser(TestVariables.MAIN_USER)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.updateUser(USER_1)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
 
         assert(exception is IllegalStateException)
     }
@@ -105,9 +106,9 @@ class UserEventServiceTest {
     @Test
     fun `deleteUserById will throw exception if user is not found`(): Unit = runBlocking {
         //given
-        val id = TestVariables.MAIN_USER.id!!
+        val id = USER_1.id!!
 
-        coEvery { userService.getUserById(id) } returns null
+        coEvery { userDbService.getUserById(id) } returns null
 
         //when
         assertThrows<IllegalArgumentException> { userEventService.deleteUserById(id) }
@@ -116,10 +117,10 @@ class UserEventServiceTest {
     @Test
     fun `deleteUserById will throw exception if user is not deleted`(): Unit = runBlocking {
         //given
-        val id = TestVariables.MAIN_USER.id!!
+        val id = USER_1.id!!
 
-        coEvery { userService.getUserById(id) } returns TestVariables.MAIN_USER
-        coEvery { userService.deleteUserById(id) } returns false
+        coEvery { userDbService.getUserById(id) } returns USER_1
+        coEvery { userDbService.deleteUserById(id) } returns false
 
         //when
         assertThrows<IllegalStateException> { userEventService.deleteUserById(id) }
@@ -130,33 +131,33 @@ class UserEventServiceTest {
         //given
         val senderResult = mockk<SenderResult<Void>>()
 
-        val id = TestVariables.MAIN_USER.id!!
+        val id = USER_1.id!!
 
-        coEvery { userService.getUserById(id) } returns TestVariables.MAIN_USER
-        coEvery { userService.deleteUserById(id) } returns true
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns senderResult
+        coEvery { userDbService.getUserById(id) } returns USER_1
+        coEvery { userDbService.deleteUserById(id) } returns true
+        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
 
         //when
         userEventService.deleteUserById(id)
 
         //then
         coVerify {
-            userService.getUserById(id)
-            userService.deleteUserById(id)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.getUserById(id)
+            userDbService.deleteUserById(id)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
     }
 
     @Test
     fun `deleteUserById will throw an exception if the user is not sent`(): Unit = runBlocking {
         //given
-        val id = TestVariables.MAIN_USER.id!!
+        val id = USER_1.id!!
 
-        coEvery { userService.getUserById(id) } returns TestVariables.MAIN_USER
-        coEvery { userService.deleteUserById(id) } returns true
-        coEvery { userProducer.sendUserData(TestVariables.MAIN_USER) } returns null
+        coEvery { userDbService.getUserById(id) } returns USER_1
+        coEvery { userDbService.deleteUserById(id) } returns true
+        coEvery { userProducer.sendUserData(USER_1) } returns null
 
         //when
         val exception = kotlin.runCatching {
@@ -165,12 +166,12 @@ class UserEventServiceTest {
 
         //then
         coVerify {
-            userService.getUserById(id)
-            userService.deleteUserById(id)
-            userProducer.sendUserData(TestVariables.MAIN_USER)
+            userDbService.getUserById(id)
+            userDbService.deleteUserById(id)
+            userProducer.sendUserData(USER_1)
         }
 
-        confirmVerified(userService, userProducer)
+        confirmVerified(userDbService, userProducer)
 
         assert(exception is IllegalStateException)
     }
