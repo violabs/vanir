@@ -1,6 +1,6 @@
 package io.violabs.freya.message
 
-import KafkaTestConfig
+import io.violabs.freya.KafkaTestConfig
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking

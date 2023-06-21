@@ -1,9 +1,11 @@
 package io.violabs.freya.controller
 
-import io.violabs.freya.TestVariables
-import io.violabs.freya.TestVariables.DATE_OF_BIRTH
-import io.violabs.freya.TestVariables.JOIN_DATE
-import io.violabs.freya.service.UserService
+import io.violabs.freya.TestVariables.User.CREATE_APP_USER_TABLE_QUERY
+import io.violabs.freya.TestVariables.User.DATE_OF_BIRTH
+import io.violabs.freya.TestVariables.User.DROP_APP_USER_TABLE_QUERY
+import io.violabs.freya.TestVariables.User.JOIN_DATE
+import io.violabs.freya.TestVariables.User.PRE_SAVED_USER_1
+import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,13 +22,13 @@ import org.springframework.test.web.reactive.server.WebTestClient
 class UserControllerFunctionalTest(
     @Autowired val client: WebTestClient,
     @Autowired val dbClient: DatabaseClient,
-    @Autowired val userService: UserService
+    @Autowired val userDbService: UserDbService
 ) {
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        dbClient.sql(TestVariables.DROP_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
-        dbClient.sql(TestVariables.CREATE_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
+        dbClient.sql(DROP_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
+        dbClient.sql(CREATE_APP_USER_TABLE_QUERY).fetch().awaitOneOrNull()
     }
 
     @Test
@@ -63,7 +65,7 @@ class UserControllerFunctionalTest(
     fun `updateUser will update a user successfully`() {
         //setup
         val createdId = runBlocking {
-            userService.createUser(TestVariables.PRE_SAVED_USER).id!!
+            userDbService.createUser(PRE_SAVED_USER_1).id!!
         }
 
         //given
@@ -100,7 +102,7 @@ class UserControllerFunctionalTest(
     fun `getUserById will get user when it exists`() {
         //setup
         val createdId = runBlocking {
-            userService.createUser(TestVariables.PRE_SAVED_USER).id!!
+            userDbService.createUser(PRE_SAVED_USER_1).id!!
         }
 
         //given
@@ -132,7 +134,7 @@ class UserControllerFunctionalTest(
     fun `deleteUserById will delete user when it exists`() {
         //setup
         val createdId = runBlocking {
-            userService.createUser(TestVariables.PRE_SAVED_USER).id!!
+            userDbService.createUser(PRE_SAVED_USER_1).id!!
         }
 
         //given

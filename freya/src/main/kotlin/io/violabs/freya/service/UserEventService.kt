@@ -2,26 +2,27 @@ package io.violabs.freya.service
 
 import io.violabs.freya.domain.AppUser
 import io.violabs.freya.message.UserProducer
+import io.violabs.freya.service.db.UserDbService
 import org.springframework.stereotype.Component
 
 @Component
-class UserEventService(private val userProducer: UserProducer, private val userService: UserService) {
+class UserEventService(private val userProducer: UserProducer, private val userDbService: UserDbService) {
 
     suspend fun createUser(user: AppUser): AppUser = sendUserAfter {
-        userService.createUser(user)
+        userDbService.createUser(user)
     }
 
     suspend fun updateUser(user: AppUser): AppUser = sendUserAfter {
-        userService.updateUser(user)
+        userDbService.updateUser(user)
     }
 
     suspend fun deleteUserById(id: Long): AppUser = sendUserAfter {
         val foundUser: AppUser =
-            userService
+            userDbService
                 .getUserById(id)
                 ?: throw IllegalArgumentException("User with id $id not found")
 
-        val deleted: Boolean = userService.deleteUserById(id)
+        val deleted: Boolean = userDbService.deleteUserById(id)
 
         if (!deleted) throw IllegalStateException("User with id $id not deleted")
 

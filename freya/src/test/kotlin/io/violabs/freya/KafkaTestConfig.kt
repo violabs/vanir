@@ -1,3 +1,5 @@
+package io.violabs.freya
+
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.boot.test.context.TestConfiguration
@@ -8,7 +10,6 @@ import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate
 open class KafkaTestConfig {
 
     @Bean
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     open fun userKafkaConsumer(consumerTemplate: ReactiveKafkaConsumerTemplate<String, AppUser>): KafkaConsumer {
         return KafkaConsumer(consumerTemplate)
     }

@@ -90,6 +90,8 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 
 ## TODO
 
+Flow - Endpoint to call to reserve a book for 
+
 ### All
 * [ ] Docker Kafka (network)
 
@@ -100,10 +102,13 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 * [x] Docker Kafka (individual)
 * [ ] Kafka Consumer
 * [x] Kafka Producer
+* [x] Setup Book
+* [x] Setup Library (UserBooks)
+* [ ] Setup HATEOAS message for kafka to call book.
+* [ ] Setup endpoint to make a book reservation that calls to Freyr for reservation info.
 
 ### Freyr
 * [ ] Docker Redis
-* [x] Postgres DB Setup
 * [x] Endpoint
 * [ ] Docker Kafka (individual)
 * [ ] Kafka Consumer
@@ -121,3 +126,4 @@ docker compose down -f ./freyr/docker-compose.branch.yml
 - [Kotlin Coroutines - Flow - Testing](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/kotlinx.coroutines.flow/-flow-test/)
 - [Kotlin R2DBC Example 1](https://github.com/helderlinhares/webflux-r2dbc-postgres-crud-api)
 - [Kotlin R2DBC Example 2](https://github.com/Baeldung/kotlin-tutorials/blob/master/spring-boot-kotlin/src/main/kotlin/com/baeldung/nonblockingcoroutines/repository/ProductRepositoryCoroutines.kt)
+- [Gradle + Docker Compose](https://github.com/avast/gradle-docker-compose-plugin)
