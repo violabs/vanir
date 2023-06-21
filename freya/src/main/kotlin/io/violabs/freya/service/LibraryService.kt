@@ -1,28 +1,31 @@
 package io.violabs.freya.service
 
+import io.violabs.freya.domain.AppUser
+import io.violabs.freya.domain.Book
 import io.violabs.freya.domain.Library
-import io.violabs.freya.domain.PostgresLibrary
-import io.violabs.freya.repository.LibraryRepository
+import io.violabs.freya.service.db.BookDbService
+import io.violabs.freya.service.db.UserBookDbService
+import io.violabs.freya.service.db.UserDbService
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 
 @Service
-class LibraryService(private val libraryRepository: LibraryRepository) {
-    suspend fun createLibrary(library: Library): Library {
-        return library
-            .toDbEntity()
-            .let { libraryRepository.save(it) }
-            .let(PostgresLibrary::toDto)
-    }
+class LibraryService(
+    private val bookDbService: BookDbService,
+    private val userBookDbService: UserBookDbService,
+    private val userDbService: UserDbService
+) {
 
-    suspend fun getLibraryById(id: Long): Library? {
-        return libraryRepository
-            .findById(id)
-            ?.toDto()
-    }
+    suspend fun getLibraryDetailsByUserId(userId: Long): Library {
+        val user: AppUser? = userDbService.getUserById(userId)
 
-    suspend fun getLibraryByUserId(userId: Long): Library? {
-        return libraryRepository
-            .findByUserId(userId)
-            ?.toDto()
+        val books: List<Book> =
+            userBookDbService
+                .getBookIdsByUserId(userId)
+                .mapNotNull(bookDbService::getBookById)
+                .toList()
+
+        return Library(user, books)
     }
 }
