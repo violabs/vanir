@@ -1,5 +1,6 @@
 package io.violabs.freya.message
 
+import io.violabs.core.domain.UserMessage
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
@@ -9,10 +10,12 @@ import reactor.kafka.sender.SenderResult
 private const val USER_TOPIC = "user"
 
 @Component
-class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, AppUser>) {
+class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, UserMessage>) {
     suspend fun sendUserData(user: AppUser): SenderResult<Void>? {
+        val message = UserMessage(user.id!!, "localhost:8080/user/${user.id}")
+
         return producerTemplate
-            .send(USER_TOPIC, user.id.toString(), user)
+            .send(USER_TOPIC, user.id.toString(), message)
             .doOnEach { println("Sent user data: $user") }
             .awaitSingleOrNull()
     }
