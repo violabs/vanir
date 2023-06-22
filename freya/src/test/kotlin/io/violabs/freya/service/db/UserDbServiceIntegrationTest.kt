@@ -1,4 +1,4 @@
-package io.violabs.freya.service
+package io.violabs.freya.service.db
 
 import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
@@ -6,7 +6,6 @@ import io.violabs.freya.TestVariables.User.PRE_SAVED_USER_1
 import io.violabs.freya.TestVariables.User.USER_1
 import io.violabs.freya.TestVariables.User.USER_2
 import io.violabs.freya.domain.AppUser
-import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test

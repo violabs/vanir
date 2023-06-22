@@ -1,14 +1,14 @@
-package io.violabs.freya.service
+package io.violabs.freya.service.db
 
 import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.TestVariables.UserBook.PRE_SAVED_USER_BOOK_1
 import io.violabs.freya.TestVariables.UserBook.USER_BOOK_1
 import io.violabs.freya.domain.UserBook
-import io.violabs.freya.service.db.UserBookDbService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest
@@ -33,6 +33,15 @@ class UserBookDbServiceIntegrationTest(
     }
 
     @Test
+    fun `createUserBook will throw an exception if it already exists`(): Unit = runBlocking {
+        testDatabaseSeeder.seedUserBook()
+
+        //when
+        assertThrows<IllegalArgumentException> { userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1) }
+    }
+
+
+    @Test
     fun `getUserBookById returns null when the userBook does not exist`() = runBlocking {
         //setup
         testDatabaseSeeder.truncateUserBook()
@@ -47,13 +56,13 @@ class UserBookDbServiceIntegrationTest(
     @Test
     fun `getUserBookById gets the userBook when it exists`() = runBlocking {
         //setup
-        val id: Long = userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1).id!!
+        testDatabaseSeeder.seedUserBook()
 
         //when
-        val found: UserBook? = userBookDbService.getUserBookById(id)
+        val found: UserBook? = userBookDbService.getUserBookById(1)
 
         //then
-        TestUtils.assertEquals(USER_BOOK_1.copy(id = id), found!!)
+        TestUtils.assertEquals(USER_BOOK_1.copy(id = 1), found!!)
     }
 
     @Test

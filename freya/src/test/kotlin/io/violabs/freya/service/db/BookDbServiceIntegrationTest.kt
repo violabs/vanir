@@ -1,11 +1,10 @@
-package io.violabs.freya.service
+package io.violabs.freya.service.db
 
 import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.TestVariables.Book.BOOK_1
 import io.violabs.freya.TestVariables.Book.PRE_SAVED_BOOK_1
 import io.violabs.freya.domain.Book
-import io.violabs.freya.service.db.BookDbService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
