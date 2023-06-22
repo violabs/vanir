@@ -12,47 +12,46 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest
 @AutoConfigureWebTestClient
 @Import(DatabaseTestConfig::class)
-class LibraryControllerFunctionalTest(
+class BookControllerFunctionalTest(
     @Autowired val client: WebTestClient,
     @Autowired val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder
 ) {
 
     @Test
-    fun `getLibraryDetailsByUserId will return a library for a given user id`() {
-        testDatabaseSeeder.seedAll()
-
-        client
-            .get()
-            .uri("/api/libraries/1")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .jsonPath("$.user.id").isEqualTo(1)
-            .jsonPath("$.books[0].id").isEqualTo(1)
-            .jsonPath("$.books[1].id").isEqualTo(2)
-    }
-
-    @Test
-    fun `addBookToLibrary will add a book to a library for a given user id`() {
-        testDatabaseSeeder.seedUserBook()
-
+    fun `createBook will create a book with an id`() {
+        testDatabaseSeeder.truncateBook()
         client
             .post()
-            .uri("/api/libraries/1/book/3")
+            .uri("/api/books")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
                 """
                     {
-                        "userId": 1,
-                        "bookId": 3
+                        "title": "testbook",
+                        "author": "Test"
                     }
                 """.trimIndent()
             )
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("$[0]").isEqualTo(1)
-            .jsonPath("$[1]").isEqualTo(2)
-            .jsonPath("$[2]").isEqualTo(3)
+            .jsonPath("$.id").isNotEmpty
+            .jsonPath("$.title").isEqualTo("testbook")
+            .jsonPath("$.author").isEqualTo("Test")
+    }
+
+    @Test
+    fun `getBookById will return a book for a given id`() {
+        testDatabaseSeeder.seedBook()
+
+        client
+            .get()
+            .uri("/api/books/1")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(1)
+            .jsonPath("$.title").isEqualTo("Test Book")
+            .jsonPath("$.author").isEqualTo("Test Author")
     }
 }

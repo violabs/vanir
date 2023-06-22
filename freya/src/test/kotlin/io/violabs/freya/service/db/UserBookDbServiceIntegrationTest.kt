@@ -1,13 +1,14 @@
-package io.violabs.freya.service
+package io.violabs.freya.service.db
 
+import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.TestVariables.UserBook.PRE_SAVED_USER_BOOK_1
 import io.violabs.freya.TestVariables.UserBook.USER_BOOK_1
 import io.violabs.freya.domain.UserBook
-import io.violabs.freya.service.db.UserBookDbService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest
@@ -27,11 +28,18 @@ class UserBookDbServiceIntegrationTest(
         //when
         val actual: UserBook = userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1)
 
-        println(actual)
-
         //then
-        assertEquals(USER_BOOK_1, actual)
+        TestUtils.assertEquals(USER_BOOK_1, actual)
     }
+
+    @Test
+    fun `createUserBook will throw an exception if it already exists`(): Unit = runBlocking {
+        testDatabaseSeeder.seedUserBook()
+
+        //when
+        assertThrows<IllegalArgumentException> { userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1) }
+    }
+
 
     @Test
     fun `getUserBookById returns null when the userBook does not exist`() = runBlocking {
@@ -42,19 +50,19 @@ class UserBookDbServiceIntegrationTest(
         val found: UserBook? = userBookDbService.getUserBookById(1)
 
         //then
-        assertEquals(null, found)
+        TestUtils.assertEquals(null, found)
     }
 
     @Test
     fun `getUserBookById gets the userBook when it exists`() = runBlocking {
         //setup
-        val id: Long = userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1).id!!
+        testDatabaseSeeder.seedUserBook()
 
         //when
-        val found: UserBook? = userBookDbService.getUserBookById(id)
+        val found: UserBook? = userBookDbService.getUserBookById(1)
 
         //then
-        assertEquals(USER_BOOK_1.copy(id = id), found!!)
+        TestUtils.assertEquals(USER_BOOK_1.copy(id = 1), found!!)
     }
 
     @Test
@@ -66,15 +74,6 @@ class UserBookDbServiceIntegrationTest(
         val ids: List<Long> = userBookDbService.getBookIdsByUserId(1).toList()
 
         //then
-        assertEquals(listOf(1L, 2L), ids)
-    }
-
-    private fun <T> assertEquals(expected: T, actual: T) {
-        assert(expected == actual) {
-            """
-               | EXPECT: $expected
-               | ACTUAL: $actual
-            """.trimMargin()
-        }
+        TestUtils.assertEquals(listOf(1L, 2L), ids)
     }
 }
