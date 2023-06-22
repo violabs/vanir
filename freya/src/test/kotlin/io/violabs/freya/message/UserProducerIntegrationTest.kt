@@ -1,6 +1,7 @@
 package io.violabs.freya.message
 
 import io.violabs.core.TestUtils
+import io.violabs.core.domain.UserMessage
 import io.violabs.freya.KafkaTestConfig
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.delay
@@ -15,15 +16,16 @@ import org.springframework.context.annotation.Import
 @Import(KafkaTestConfig::class)
 class UserProducerIntegrationTest(
     @Autowired private val userProducer: UserProducer,
-    @Autowired private val userKafkaConsumer: KafkaTestConfig.KafkaConsumer
+    @Autowired private val userKafkaConsumer: KafkaTestConfig.UserKafkaConsumer
 ) {
 
     @Test
     fun `should send user data to kafka`() = runBlocking {
         val user = AppUser(1, "test", "test", "test", "test")
+        val message = UserMessage(1, "localhost:8080/user/1")
         userProducer.sendUserData(user)
         delay(2000)
-        val receivedUser = withTimeoutOrNull(15_000) { userKafkaConsumer.consume() }
-        TestUtils.assertEquals(user, receivedUser)
+        val receivedMessage = withTimeoutOrNull(15_000) { userKafkaConsumer.consume() }
+        TestUtils.assertEquals(message, receivedMessage)
     }
 }

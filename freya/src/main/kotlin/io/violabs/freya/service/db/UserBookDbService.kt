@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service
 @Service
 class UserBookDbService(private val userBookRepository: UserBookRepository) {
     suspend fun createUserBook(userBook: UserBook): UserBook {
-        val exists: Boolean = userBookRepository.existsByUserIdAndBookId(userBook.userId!!, userBook.bookId!!) ?: false
+        val exists: Boolean = userBookRepository.existsByUserIdAndBookId(userBook.userId!!, userBook.bookId!!) != null
 
-        if (exists) throw IllegalArgumentException("UserBook already exists")
+        if (exists) throw IllegalArgumentException("UserBook already exists $userBook")
 
         return userBookRepository.save(userBook)
     }

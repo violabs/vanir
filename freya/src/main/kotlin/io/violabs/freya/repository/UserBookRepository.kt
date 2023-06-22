@@ -13,5 +13,5 @@ interface UserBookRepository : CoroutineCrudRepository<UserBook, Long> {
     fun getBookIdsByUserId(userId: Long): Flow<Long>
 
     @Query("SELECT 1 FROM user_book WHERE user_id = :userId AND book_id = :bookId")
-    suspend fun existsByUserIdAndBookId(userId: Long, bookId: Long): Boolean?    // suspend covers this
+    suspend fun existsByUserIdAndBookId(userId: Long, bookId: Long): Int?    // suspend covers this
 }
