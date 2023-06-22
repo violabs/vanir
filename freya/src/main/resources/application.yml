@@ -1,3 +1,7 @@
+app:
+  kafka:
+    order-topic: orders
+    user-topic: users
 
 management:
   endpoint:

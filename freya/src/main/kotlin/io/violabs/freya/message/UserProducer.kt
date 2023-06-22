@@ -7,15 +7,13 @@ import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Component
 import reactor.kafka.sender.SenderResult
 
-private const val USER_TOPIC = "user"
-
 @Component
 class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, UserMessage>) {
     suspend fun sendUserData(user: AppUser): SenderResult<Void>? {
         val message = UserMessage(user.id!!, "localhost:8080/user/${user.id}")
 
         return producerTemplate
-            .send(USER_TOPIC, user.id.toString(), message)
+            .send("users", user.id.toString(), message)
             .doOnEach { println("Sent user data: $user") }
             .awaitSingleOrNull()
     }
