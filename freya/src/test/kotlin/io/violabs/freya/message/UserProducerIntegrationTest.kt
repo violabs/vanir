@@ -1,5 +1,6 @@
 package io.violabs.freya.message
 
+import io.violabs.core.TestUtils
 import io.violabs.freya.KafkaTestConfig
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.delay
@@ -23,8 +24,6 @@ class UserProducerIntegrationTest(
         userProducer.sendUserData(user)
         delay(2000)
         val receivedUser = withTimeoutOrNull(15_000) { userKafkaConsumer.consume() }
-        assert(receivedUser == user) {
-            "EXPECT: $user\nACTUAL: $receivedUser"
-        }
+        TestUtils.assertEquals(user, receivedUser)
     }
 }

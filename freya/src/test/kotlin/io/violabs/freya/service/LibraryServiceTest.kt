@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import io.violabs.core.TestUtils
 import io.violabs.freya.domain.AppUser
 import io.violabs.freya.domain.Book
 import io.violabs.freya.domain.Library
@@ -47,21 +48,12 @@ class LibraryServiceTest {
         val library = runBlocking { libraryService.getLibraryDetailsByUserId(1) }
 
         // then
-        assertEquals(expected, library)
+        TestUtils.assertEquals(expected, library)
         coVerify { userDbService.getUserById(1) }
         coVerify { userBookDbService.getBookIdsByUserId(1) }
         coVerify { bookDbService.getBookById(1) }
         coVerify { bookDbService.getBookById(2) }
         coVerify { bookDbService.getBookById(3) }
         confirmVerified(userDbService, userBookDbService, bookDbService)
-    }
-
-    private fun <T> assertEquals(expected: T, actual: T) {
-        assert(expected == actual) {
-            """
-               | EXPECT: $expected
-               | ACTUAL: $actual
-            """.trimMargin()
-        }
     }
 }

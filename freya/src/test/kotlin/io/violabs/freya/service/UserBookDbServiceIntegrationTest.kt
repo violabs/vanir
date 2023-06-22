@@ -1,5 +1,6 @@
 package io.violabs.freya.service
 
+import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.TestVariables.UserBook.PRE_SAVED_USER_BOOK_1
 import io.violabs.freya.TestVariables.UserBook.USER_BOOK_1
@@ -27,10 +28,8 @@ class UserBookDbServiceIntegrationTest(
         //when
         val actual: UserBook = userBookDbService.createUserBook(PRE_SAVED_USER_BOOK_1)
 
-        println(actual)
-
         //then
-        assertEquals(USER_BOOK_1, actual)
+        TestUtils.assertEquals(USER_BOOK_1, actual)
     }
 
     @Test
@@ -42,7 +41,7 @@ class UserBookDbServiceIntegrationTest(
         val found: UserBook? = userBookDbService.getUserBookById(1)
 
         //then
-        assertEquals(null, found)
+        TestUtils.assertEquals(null, found)
     }
 
     @Test
@@ -54,7 +53,7 @@ class UserBookDbServiceIntegrationTest(
         val found: UserBook? = userBookDbService.getUserBookById(id)
 
         //then
-        assertEquals(USER_BOOK_1.copy(id = id), found!!)
+        TestUtils.assertEquals(USER_BOOK_1.copy(id = id), found!!)
     }
 
     @Test
@@ -66,15 +65,6 @@ class UserBookDbServiceIntegrationTest(
         val ids: List<Long> = userBookDbService.getBookIdsByUserId(1).toList()
 
         //then
-        assertEquals(listOf(1L, 2L), ids)
-    }
-
-    private fun <T> assertEquals(expected: T, actual: T) {
-        assert(expected == actual) {
-            """
-               | EXPECT: $expected
-               | ACTUAL: $actual
-            """.trimMargin()
-        }
+        TestUtils.assertEquals(listOf(1L, 2L), ids)
     }
 }

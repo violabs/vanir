@@ -29,7 +29,7 @@ open class DatabaseTestConfig {
         private val dbClient: DatabaseClient
     ) {
         fun seedBook(): Unit = runBlocking {
-            truncate("book")
+            truncateBook()
 
             listOf(TestVariables.Book.PRE_SAVED_BOOK_1, TestVariables.Book.PRE_SAVED_BOOK_2)
                 .map { bookRepository.save(it) }
@@ -45,7 +45,7 @@ open class DatabaseTestConfig {
         }
 
         fun seedUser(): Unit = runBlocking {
-            truncate("app_user")
+            truncateUser()
 
             listOf(TestVariables.User.PRE_SAVED_USER_1, TestVariables.User.PRE_SAVED_USER_2)
                 .map { userRepository.save(it) }
@@ -54,6 +54,14 @@ open class DatabaseTestConfig {
 
         fun truncateUserBook(): Unit = runBlocking {
             truncate("user_book")
+        }
+
+        fun truncateUser(): Unit = runBlocking {
+            truncate("app_user")
+        }
+
+        fun truncateBook(): Unit = runBlocking {
+            truncate("book")
         }
 
         private suspend fun truncate(tableName: String) {
