@@ -1,11 +1,11 @@
-package io.violabs.freya
+package io.violabs.freyr
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-open class Application
+open class FreyrApplication
 
 fun main(args: Array<String>) {
-    runApplication<Application>(*args)
+    runApplication<FreyrApplication>(*args)
 }

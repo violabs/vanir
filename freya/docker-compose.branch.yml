@@ -1,7 +1,7 @@
 version: '3.8'
 services:
-  app:
-    container_name: branch-app
+  freya-app:
+    container_name: freya-branch-app
     image: eclipse-temurin:17-jdk-alpine
     depends_on:
       - freya-postgres
@@ -15,7 +15,7 @@ services:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
     privileged: true
-    command: './gradlew freya:clean freya:build -Dspring.profiles.active=test --project-cache-dir=/tmp --no-daemon test --info'
+    command: './gradlew freya:clean freya:build -Dspring.profiles.active=test --project-cache-dir=/tmp --no-daemon --info'
 
   freya-postgres:
     image: postgres:latest
