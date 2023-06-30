@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: freyr
+  data:
+    redis:
+      port: 6379
+      host: freyr-redis
+  kafka:
+    bootstrap-servers:
+      - freyr-kafka-0:29092
+      - freyr-kafka-1:39092

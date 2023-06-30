@@ -1,4 +1,4 @@
-package io.violabs.freya
+package io.violabs.freyr
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
