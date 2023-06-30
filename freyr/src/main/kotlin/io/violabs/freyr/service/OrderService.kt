@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service
 class OrderService(private val orderRedisOps: ReactiveRedisOperations<String, Order>)  {
 
     suspend fun saveOrder(order: Order): Boolean {
-        return orderRedisOps.opsForValue().set(order.id, order).awaitSingleOrNull() ?: false
+        val id: String = order.id ?: throw Exception("Missing Id!!")
+
+        return orderRedisOps.opsForValue().set(id, order).awaitSingleOrNull() ?: false
     }
 
     suspend fun findOrderById(id: String): Order? {
