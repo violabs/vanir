@@ -1,13 +1,89 @@
 version: '3.8'
 services:
-  app:
-    container_name: branch-app
+  freyr-app:
+    container_name: freyr-branch-app
     image: eclipse-temurin:17-jdk-alpine
+    depends_on:
+      - freyr-redis
+      - freyr-kafka-0
+      - freyr-kafka-1
     volumes:
       - ../.:/app
       - ${HOME}/.gradle:/app/.gradle
+      - ./build/reports:/app/build/reports
     environment:
       - GRADLE_USER_HOME=${HOME}/.gradle
     working_dir: /app
     privileged: true
-    command: './gradlew freyj:clean freyj:test -Dspring.profiles.active=integrationtest --project-cache-dir=/tmp --no-daemon test --info'
+    command: './gradlew freyr:clean freyr:test -Dspring.profiles.active=ci --project-cache-dir=/tmp --no-daemon --info'
+
+  freyr-redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+
+  freyr-kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - freyr-zookeeper-0
+      - freyr-zookeeper-1
+      - freyr-kafka-0
+      - freyr-kafka-1
+    ports:
+      - "8081:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local0
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=freyr-kafka-0:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=freyr-zookeeper-0:2181
+      - KAFKA_CLUSTERS_1_NAME=local1
+      - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=freyr-kafka-1:9092
+      - KAFKA_CLUSTERS_1_ZOOKEEPER=freyr-zookeeper-1:2181
+      - DYNAMIC_CONFIG_ENABLED=true
+    volumes:
+      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+
+  freyr-zookeeper-0:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+  freyr-zookeeper-1:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "32181:2181"
+  freyr-kafka-0:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - freyr-zookeeper-0
+      - freyr-zookeeper-1
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: freyr-zookeeper-0:2181,freyr-zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://freyr-kafka-0:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  freyr-kafka-1:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - freyr-zookeeper-0
+      - freyr-zookeeper-1
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: freyr-zookeeper-0:2181,freyr-zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://freyr-kafka-1:9092,PLAINTEXT_HOST://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
