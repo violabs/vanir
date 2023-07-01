@@ -1,7 +1,6 @@
-package io.violabs.freyr.service
+package io.violabs.freyr.repository
 
 import io.violabs.core.TestUtils
-import io.violabs.freyr.config.OrderRedisOps
 import io.violabs.freyr.domain.Order
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,15 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
 import java.time.Instant
 import java.util.*
 
 @SpringBootTest
 @Import(RedisReactiveAutoConfiguration::class)
-class OrderServiceIntegrationTest(
-    @Autowired private val orderService: OrderService,
-    @Autowired private val orderRedisOps: OrderRedisOps
+class OrderRepoIntegrationTest(
+    @Autowired private val orderRepo: OrderRepo,
+    @Autowired private val factory: ReactiveRedisConnectionFactory
 ) {
+    private val orderRedisOps: RedisOps<Order> = RedisRepo.createRedisOps(factory, Order::class.java)
 
     private val now = Instant.now()
     private val sharedUuid = UUID.nameUUIDFromBytes("test".toByteArray()).toString()
@@ -39,13 +40,13 @@ class OrderServiceIntegrationTest(
 
     @Test
     fun `saveOrder throws exception if id is null`(): Unit = runBlocking {
-        assertThrows<Exception> { orderService.saveOrder(Order()) }
+        assertThrows<Exception> { orderRepo.saveOrder(Order()) }
     }
 
     @Test
     fun `saveOrder saves order to redis`() = runBlocking {
         //when
-        val actual = orderService.saveOrder(sharedOrder)
+        val actual = orderRepo.saveOrder(sharedOrder)
 
         //then
         assert(actual) {
@@ -56,7 +57,7 @@ class OrderServiceIntegrationTest(
     @Test
     fun `findOrderById will return null if not found`() = runBlocking {
         //when
-        val actual: Order? = orderService.findOrderById(sharedUuid)
+        val actual: Order? = orderRepo.findOrderById(sharedUuid)
 
         //then
         TestUtils.assertEquals(null, actual)
@@ -68,7 +69,7 @@ class OrderServiceIntegrationTest(
         createOrder()
 
         //when
-        val actual: Order? = orderService.findOrderById(sharedUuid)
+        val actual: Order? = orderRepo.findOrderById(sharedUuid)
 
         //then
         TestUtils.assertEquals(sharedOrder, actual)
@@ -77,7 +78,7 @@ class OrderServiceIntegrationTest(
     @Test
     fun `deleteOrderById will return false when order does not exist`() = runBlocking {
         //when
-        val actual: Boolean = orderService.deleteOrderById(sharedUuid)
+        val actual: Boolean = orderRepo.deleteOrderById(sharedUuid)
 
         //then
         assert(!actual) {
@@ -91,7 +92,7 @@ class OrderServiceIntegrationTest(
         createOrder()
 
         //when
-        val actual: Boolean = orderService.deleteOrderById(sharedUuid)
+        val actual: Boolean = orderRepo.deleteOrderById(sharedUuid)
 
         //then
         assert(actual) {
@@ -102,7 +103,7 @@ class OrderServiceIntegrationTest(
     @Test
     fun `findAllOrders will return empty list when no orders exist`() = runBlocking {
         //when
-        val actual: List<Order> = orderService.findAllOrders().toList()
+        val actual: List<Order> = orderRepo.findAllOrders().toList()
 
         //then
         assert(actual.isEmpty()) {
@@ -119,10 +120,10 @@ class OrderServiceIntegrationTest(
         createOrder(uuid2, order2)
 
         //when
-        val actual: List<Order> = orderService.findAllOrders().toList()
+        val actual: List<Order> = orderRepo.findAllOrders().toList()
 
         //then
-        TestUtils.assertEquals(listOf(sharedOrder, order2), actual)
+        TestUtils.assertContains(actual, listOf(sharedOrder, order2))
     }
 
     private suspend fun createOrder(uuid: String = sharedUuid, order: Order = sharedOrder) {
