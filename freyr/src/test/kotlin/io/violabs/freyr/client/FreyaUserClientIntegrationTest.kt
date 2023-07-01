@@ -2,6 +2,7 @@ package io.violabs.freyr.client
 
 import io.violabs.core.TestUtils
 import io.violabs.core.domain.UserMessage
+import io.violabs.freyr.FreyrTestVariables
 import io.violabs.freyr.domain.AppUser
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -13,23 +14,10 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 @SpringBootTest
 class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: FreyaUserClient) {
-
-    private val sharedMessage = UserMessage(
-        userId = 1L,
-        uri = "http://localhost:8083/user/1",
-        type = UserMessage.Type.USER_CREATED
-    )
-
     @BeforeEach
     fun setup() {
-//        server.start(8083)
         clearRequests()
     }
-
-//    @AfterEach
-//    fun tearDown() {
-//        server.shutdown()
-//    }
 
     @Test
     fun `fetchUser will return a 404`(): Unit = runBlocking {
@@ -41,7 +29,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        assertThrows<WebClientResponseException.NotFound> { freyaUserClient.fetchUser(sharedMessage) }
+        assertThrows<WebClientResponseException.NotFound> { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
     }
 
     @Test
@@ -54,7 +42,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(sharedMessage) }
+        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
 
         //then
         Assertions.assertNull(actual)
@@ -93,7 +81,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(sharedMessage) }
+        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
 
         //then
         TestUtils.assertEquals(expected, actual)

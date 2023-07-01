@@ -5,5 +5,6 @@ data class AppUser(
     val username: String? = null,
     val firstname: String? = null,
     val lastname: String? = null,
-    val email: String? = null
+    val email: String? = null,
+    val lastUpdated: String? = null
 )
