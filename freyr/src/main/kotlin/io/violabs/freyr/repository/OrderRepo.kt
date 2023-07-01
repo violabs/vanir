@@ -1,4 +1,4 @@
-package io.violabs.freyr.service
+package io.violabs.freyr.repository
 
 import io.violabs.freyr.domain.Order
 import kotlinx.coroutines.flow.Flow
@@ -6,10 +6,11 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisOperations
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
-@Service
-class OrderService(private val orderRedisOps: ReactiveRedisOperations<String, Order>)  {
+@Repository
+open class OrderRepo(private val orderRedisOps: ReactiveRedisOperations<String, Order>)  {
 
     suspend fun saveOrder(order: Order): Boolean {
         val id: String = order.id ?: throw Exception("Missing Id!!")

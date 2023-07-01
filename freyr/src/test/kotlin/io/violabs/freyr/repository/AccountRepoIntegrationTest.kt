@@ -1,7 +1,8 @@
-package io.violabs.freyr.service
+package io.violabs.freyr.repository
 
 import io.violabs.core.TestUtils
 import io.violabs.freyr.config.AccountRedisOps
+import io.violabs.freyr.config.RedisConfig
 import io.violabs.freyr.domain.Account
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,8 +20,8 @@ import org.springframework.context.annotation.Import
 
 @SpringBootTest
 @Import(RedisReactiveAutoConfiguration::class)
-class AccountServiceIntegrationTest(
-    @Autowired private val accountService: AccountService,
+class AccountRepoIntegrationTest(
+    @Autowired private val accountRepo: AccountRepo,
     @Autowired private val accountRedisOps: AccountRedisOps
 ) {
     private val sharedAccount = Account("1", 1, listOf("abc", "def"))
@@ -36,13 +37,13 @@ class AccountServiceIntegrationTest(
 
     @Test
     fun `saveAccount throws exception if id is null`(): Unit = runBlocking {
-        assertThrows<Exception> { accountService.saveAccount(Account()) }
+        assertThrows<Exception> { accountRepo.saveAccount(Account()) }
     }
 
     @Test
     fun  `saveAccount saves account to redis`() = runBlocking {
         //when
-        val actual = accountService.saveAccount(sharedAccount)
+        val actual = accountRepo.saveAccount(sharedAccount)
 
         //then
         assert(actual) {
@@ -53,7 +54,7 @@ class AccountServiceIntegrationTest(
     @Test
     fun `findAccountById will return null if not found`() = runBlocking {
         //when
-        val actual: Account? = accountService.findAccountById("1")
+        val actual: Account? = accountRepo.findAccountById("1")
 
         //then
         assert(actual == null) {
@@ -64,10 +65,10 @@ class AccountServiceIntegrationTest(
     @Test
     fun `findAccountById will return account if found`() = runBlocking {
         //given
-        accountService.saveAccount(sharedAccount)
+        accountRepo.saveAccount(sharedAccount)
 
         //when
-        val actual: Account? = accountService.findAccountById("1")
+        val actual: Account? = accountRepo.findAccountById("1")
 
         //then
         assert(actual == sharedAccount) {
@@ -78,7 +79,7 @@ class AccountServiceIntegrationTest(
     @Test
     fun `deleteAccountById will return false when account does not exist`() = runBlocking {
         //when
-        val actual: Boolean = accountService.deleteAccountById("1")
+        val actual: Boolean = accountRepo.deleteAccountById("1")
 
         //then
         assert(!actual) {
@@ -92,7 +93,7 @@ class AccountServiceIntegrationTest(
         createAccount(sharedAccount)
 
         //when
-        val actual: Boolean = accountService.deleteAccountById("1")
+        val actual: Boolean = accountRepo.deleteAccountById("1")
 
         //then
         assert(actual) {
@@ -103,7 +104,7 @@ class AccountServiceIntegrationTest(
     @Test
     fun `findAllAccounts will return empty list when no accounts exist`() = runBlocking {
         //when
-        val actual: List<Account> = accountService.findAllAccounts().toList()
+        val actual: List<Account> = accountRepo.findAllAccounts().toList()
 
         //then
         assert(actual.isEmpty()) {
@@ -120,7 +121,7 @@ class AccountServiceIntegrationTest(
         val expected = listOf(sharedAccount, account2)
 
         //when
-        val actual: List<Account> = accountService.findAllAccounts().toList()
+        val actual: List<Account> = accountRepo.findAllAccounts().toList()
 
         //then
         TestUtils.assertContains(actual, expected)

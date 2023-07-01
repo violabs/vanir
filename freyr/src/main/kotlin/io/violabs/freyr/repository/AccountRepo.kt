@@ -1,4 +1,4 @@
-package io.violabs.freyr.service
+package io.violabs.freyr.repository
 
 import io.violabs.freyr.domain.Account
 import kotlinx.coroutines.flow.Flow
@@ -6,10 +6,11 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveRedisOperations
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
-@Service
-class AccountService(private val accountRedisOps: ReactiveRedisOperations<String, Account>) {
+@Repository
+open class AccountRepo(private val accountRedisOps: ReactiveRedisOperations<String, Account>) {
 
         suspend fun saveAccount(account: Account): Boolean {
             val id: String = account.id ?: throw Exception("Missing Id!!")
