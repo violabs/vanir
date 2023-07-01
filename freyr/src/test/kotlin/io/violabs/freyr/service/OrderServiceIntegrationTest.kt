@@ -65,7 +65,7 @@ class OrderServiceIntegrationTest(
     @Test
     fun `findOrderById will find an order when it exists`() = runBlocking {
         //given
-        saveRawOrder()
+        createOrder()
 
         //when
         val actual: Order? = orderService.findOrderById(sharedUuid)
@@ -81,14 +81,14 @@ class OrderServiceIntegrationTest(
 
         //then
         assert(!actual) {
-            "Was able to delete $sharedOrder"
+            "Was not able to delete $sharedOrder"
         }
     }
 
     @Test
     fun `deleteOrderById will delete an order when it exists`() = runBlocking {
         //given
-        saveRawOrder()
+        createOrder()
 
         //when
         val actual: Boolean = orderService.deleteOrderById(sharedUuid)
@@ -113,10 +113,10 @@ class OrderServiceIntegrationTest(
     @Test
     fun `findAllOrders will return list of orders when orders exist`() = runBlocking {
         //given
-        saveRawOrder()
+        createOrder()
         val uuid2 = UUID.nameUUIDFromBytes("test2".toByteArray()).toString()
         val order2 = Order(uuid2, 2, 2, now.toString())
-        saveRawOrder(uuid2, order2)
+        createOrder(uuid2, order2)
 
         //when
         val actual: List<Order> = orderService.findAllOrders().toList()
@@ -125,7 +125,7 @@ class OrderServiceIntegrationTest(
         TestUtils.assertEquals(listOf(sharedOrder, order2), actual)
     }
 
-    private suspend fun saveRawOrder(uuid: String = sharedUuid, order: Order = sharedOrder) {
+    private suspend fun createOrder(uuid: String = sharedUuid, order: Order = sharedOrder) {
         orderRedisOps
             .opsForValue()
             .set(uuid, order)

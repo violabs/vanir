@@ -108,7 +108,7 @@ Flow - Endpoint to call to reserve a book for
 * [ ] Setup endpoint to make a book reservation that calls to Freyr for reservation info.
 
 ### Freyr
-* [ ] Docker Redis
+* [x] Docker Redis
 * [x] Endpoint
 * [ ] Docker Kafka (individual)
 * [ ] Kafka Consumer
