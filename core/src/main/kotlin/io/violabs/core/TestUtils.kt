@@ -9,4 +9,13 @@ object TestUtils {
             """.trimMargin()
         }
     }
+
+    fun <T> assertContains(actual: List<T>, expected: List<T>) {
+        assert(actual.containsAll(expected)) {
+            """
+               | EXPECT: $expected
+               | ACTUAL: $actual
+            """.trimMargin()
+        }
+    }
 }
