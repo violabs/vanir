@@ -1,7 +1,6 @@
 package io.violabs.freyr.client
 
 import io.violabs.core.TestUtils
-import io.violabs.core.domain.UserMessage
 import io.violabs.freyr.FreyrTestVariables
 import io.violabs.freyr.domain.AppUser
 import kotlinx.coroutines.runBlocking

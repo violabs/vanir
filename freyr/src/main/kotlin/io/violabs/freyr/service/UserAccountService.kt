@@ -2,7 +2,6 @@ package io.violabs.freyr.service
 
 import io.violabs.core.domain.UserMessage
 import io.violabs.freyr.client.FreyaUserClient
-import io.violabs.freyr.config.UuidGenerator
 import io.violabs.freyr.domain.Account
 import io.violabs.freyr.repository.AccountRepo
 import org.springframework.stereotype.Service
