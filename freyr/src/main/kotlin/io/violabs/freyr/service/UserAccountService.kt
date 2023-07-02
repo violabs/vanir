@@ -27,8 +27,18 @@ class UserAccountService(
     suspend fun updateAccount(userMessage: UserMessage): Account? {
         val user = userClient.fetchUser(userMessage) ?: return null
 
-        return accountService.saveAccount(user) { accountId, _ ->
-            accountRepo.findAccountById(accountId)
-        }
+        return accountService.saveAccount(user) { accountId, _ -> accountRepo.findById(accountId) }
+    }
+
+    suspend fun deleteAccount(userMessage: UserMessage): Boolean {
+        val userId = userMessage.userId
+
+        return accountService.deleteAccountByUserId(userId)
+    }
+
+    suspend fun deactivateAccount(userMessage: UserMessage): Boolean {
+        // todo
+
+        return false
     }
 }
