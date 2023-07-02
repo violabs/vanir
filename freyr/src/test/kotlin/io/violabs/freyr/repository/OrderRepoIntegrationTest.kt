@@ -39,14 +39,14 @@ class OrderRepoIntegrationTest(
     }
 
     @Test
-    fun `saveOrder throws exception if id is null`(): Unit = runBlocking {
-        assertThrows<Exception> { orderRepo.saveOrder(Order()) }
+    fun `save throws exception if id is null`(): Unit = runBlocking {
+        assertThrows<Exception> { orderRepo.save(Order()) }
     }
 
     @Test
-    fun `saveOrder saves order to redis`() = runBlocking {
+    fun `save saves order to redis`() = runBlocking {
         //when
-        val actual = orderRepo.saveOrder(sharedOrder)
+        val actual = orderRepo.save(sharedOrder)
 
         //then
         assert(actual) {
@@ -55,30 +55,30 @@ class OrderRepoIntegrationTest(
     }
 
     @Test
-    fun `findOrderById will return null if not found`() = runBlocking {
+    fun `findById will return null if not found`() = runBlocking {
         //when
-        val actual: Order? = orderRepo.findOrderById(sharedUuid)
+        val actual: Order? = orderRepo.findById(sharedUuid)
 
         //then
         TestUtils.assertEquals(null, actual)
     }
 
     @Test
-    fun `findOrderById will find an order when it exists`() = runBlocking {
+    fun `findById will find an order when it exists`() = runBlocking {
         //given
         createOrder()
 
         //when
-        val actual: Order? = orderRepo.findOrderById(sharedUuid)
+        val actual: Order? = orderRepo.findById(sharedUuid)
 
         //then
         TestUtils.assertEquals(sharedOrder, actual)
     }
 
     @Test
-    fun `deleteOrderById will return false when order does not exist`() = runBlocking {
+    fun `deleteById will return false when order does not exist`() = runBlocking {
         //when
-        val actual: Boolean = orderRepo.deleteOrderById(sharedUuid)
+        val actual: Boolean = orderRepo.deleteById(sharedUuid)
 
         //then
         assert(!actual) {
@@ -87,12 +87,12 @@ class OrderRepoIntegrationTest(
     }
 
     @Test
-    fun `deleteOrderById will delete an order when it exists`() = runBlocking {
+    fun `deleteById will delete an order when it exists`() = runBlocking {
         //given
         createOrder()
 
         //when
-        val actual: Boolean = orderRepo.deleteOrderById(sharedUuid)
+        val actual: Boolean = orderRepo.deleteById(sharedUuid)
 
         //then
         assert(actual) {
@@ -101,9 +101,9 @@ class OrderRepoIntegrationTest(
     }
 
     @Test
-    fun `findAllOrders will return empty list when no orders exist`() = runBlocking {
+    fun `findAll will return empty list when no orders exist`() = runBlocking {
         //when
-        val actual: List<Order> = orderRepo.findAllOrders().toList()
+        val actual: List<Order> = orderRepo.findAll().toList()
 
         //then
         assert(actual.isEmpty()) {
@@ -112,7 +112,7 @@ class OrderRepoIntegrationTest(
     }
 
     @Test
-    fun `findAllOrders will return list of orders when orders exist`() = runBlocking {
+    fun `findAll will return list of orders when orders exist`() = runBlocking {
         //given
         createOrder()
         val uuid2 = UUID.nameUUIDFromBytes("test2".toByteArray()).toString()
@@ -120,7 +120,7 @@ class OrderRepoIntegrationTest(
         createOrder(uuid2, order2)
 
         //when
-        val actual: List<Order> = orderRepo.findAllOrders().toList()
+        val actual: List<Order> = orderRepo.findAll().toList()
 
         //then
         TestUtils.assertContains(actual, listOf(sharedOrder, order2))

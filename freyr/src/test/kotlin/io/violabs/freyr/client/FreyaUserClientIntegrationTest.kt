@@ -13,9 +13,17 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 @SpringBootTest
 class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: FreyaUserClient) {
+    private var server = MockWebServer()
+
     @BeforeEach
     fun setup() {
-        clearRequests()
+        server = MockWebServer()
+        server.start(8083)
+    }
+
+    @AfterEach
+    fun teardown() {
+        server.shutdown()
     }
 
     @Test
@@ -29,6 +37,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
 
         //when
         assertThrows<WebClientResponseException.NotFound> { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
+        server.takeRequest()
     }
 
     @Test
@@ -45,6 +54,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
 
         //then
         Assertions.assertNull(actual)
+        server.takeRequest()
     }
 
     @Test
@@ -84,26 +94,6 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
 
         //then
         TestUtils.assertEquals(expected, actual)
-    }
-
-    companion object {
-        private val server = MockWebServer()
-
-        @JvmStatic
-        @BeforeAll
-        fun setupAll() {
-            server.start(8083)
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun tearDownAll() {
-            server.shutdown()
-        }
-
-
-        fun clearRequests() {
-            0.until(server.requestCount).forEach { _ -> server.takeRequest() }
-        }
+        server.takeRequest()
     }
 }

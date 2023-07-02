@@ -41,14 +41,14 @@ class AccountServiceTest {
         //given
         val accountProvider: suspend (String, Long) -> Account? = { _, _ -> NEW_ACCOUNT }
         every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
-        coEvery { accountRepo.saveAccount(NEW_ACCOUNT) } returns false
+        coEvery { accountRepo.save(NEW_ACCOUNT) } returns false
 
         //when
         val actual: Account? = accountService.saveAccount(USER, accountProvider)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
-        coVerify { accountRepo.saveAccount(NEW_ACCOUNT) }
+        coVerify { accountRepo.save(NEW_ACCOUNT) }
         assert(actual == null)
     }
 
@@ -57,15 +57,47 @@ class AccountServiceTest {
         //given
         val accountProvider: suspend (String, Long) -> Account? = { _, _ -> NEW_ACCOUNT }
         every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
-        coEvery { accountRepo.saveAccount(NEW_ACCOUNT) } returns true
+        coEvery { accountRepo.save(NEW_ACCOUNT) } returns true
 
         //when
         val actual: Account? = accountService.saveAccount(USER, accountProvider)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
-        coVerify { accountRepo.saveAccount(NEW_ACCOUNT) }
+        coVerify { accountRepo.save(NEW_ACCOUNT) }
         assert(actual == NEW_ACCOUNT)
     }
     //endregion saveAccount
+
+    //region deleteAccountByUserId
+    @Test
+    fun `deleteAccountByUserId will return false if account was not deleted`() = runBlocking {
+        //given
+        every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
+        coEvery { accountRepo.deleteById(ACCOUNT_UUID.toString()) } returns false
+
+        //when
+        val actual: Boolean = accountService.deleteAccountByUserId(USER.id!!)
+
+        //then
+        verify { uuidGenerator.generate(USER.id.toString()) }
+        coVerify { accountRepo.deleteById(ACCOUNT_UUID.toString()) }
+        assert(!actual)
+    }
+
+    @Test
+    fun `deleteAccountByUserId will return true if account was deleted`() = runBlocking {
+        //given
+        every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
+        coEvery { accountRepo.deleteById(ACCOUNT_UUID.toString()) } returns true
+
+        //when
+        val actual: Boolean = accountService.deleteAccountByUserId(USER.id!!)
+
+        //then
+        verify { uuidGenerator.generate(USER.id.toString()) }
+        coVerify { accountRepo.deleteById(ACCOUNT_UUID.toString()) }
+        assert(actual)
+    }
+    //endregion deleteAccountByUserId
 }

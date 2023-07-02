@@ -37,14 +37,14 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `saveAccount throws exception if id is null`(): Unit = runBlocking {
-        assertThrows<Exception> { accountRepo.saveAccount(Account()) }
+    fun `save throws exception if id is null`(): Unit = runBlocking {
+        assertThrows<Exception> { accountRepo.save(Account()) }
     }
 
     @Test
-    fun  `saveAccount saves account to redis`() = runBlocking {
+    fun  `save saves account to redis`() = runBlocking {
         //when
-        val actual = accountRepo.saveAccount(sharedAccount)
+        val actual = accountRepo.save(sharedAccount)
 
         //then
         assert(actual) {
@@ -53,9 +53,9 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `findAccountById will return null if not found`() = runBlocking {
+    fun `findById will return null if not found`() = runBlocking {
         //when
-        val actual: Account? = accountRepo.findAccountById("1")
+        val actual: Account? = accountRepo.findById("1")
 
         //then
         assert(actual == null) {
@@ -64,12 +64,12 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `findAccountById will return account if found`() = runBlocking {
+    fun `findById will return account if found`() = runBlocking {
         //given
-        accountRepo.saveAccount(sharedAccount)
+        accountRepo.save(sharedAccount)
 
         //when
-        val actual: Account? = accountRepo.findAccountById("1")
+        val actual: Account? = accountRepo.findById("1")
 
         //then
         assert(actual == sharedAccount) {
@@ -78,9 +78,9 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `deleteAccountById will return false when account does not exist`() = runBlocking {
+    fun `deleteById will return false when account does not exist`() = runBlocking {
         //when
-        val actual: Boolean = accountRepo.deleteAccountById("1")
+        val actual: Boolean = accountRepo.deleteById("1")
 
         //then
         assert(!actual) {
@@ -89,12 +89,12 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `deleteAccountById will return true when account exists`() = runBlocking {
+    fun `deleteById will return true when account exists`() = runBlocking {
         //given
         createAccount(sharedAccount)
 
         //when
-        val actual: Boolean = accountRepo.deleteAccountById("1")
+        val actual: Boolean = accountRepo.deleteById("1")
 
         //then
         assert(actual) {
@@ -103,9 +103,9 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `findAllAccounts will return empty list when no accounts exist`() = runBlocking {
+    fun `findAll will return empty list when no accounts exist`() = runBlocking {
         //when
-        val actual: List<Account> = accountRepo.findAllAccounts().toList()
+        val actual: List<Account> = accountRepo.findAll().toList()
 
         //then
         assert(actual.isEmpty()) {
@@ -114,7 +114,7 @@ class AccountRepoIntegrationTest(
     }
 
     @Test
-    fun `findAllAccounts will return list of accounts when accounts exist`() = runBlocking {
+    fun `findAll will return list of accounts when accounts exist`() = runBlocking {
         //given
         createAccount(sharedAccount)
         val account2 = Account("2", 2, listOf("ghi", "jkl"))
@@ -122,7 +122,7 @@ class AccountRepoIntegrationTest(
         val expected = listOf(sharedAccount, account2)
 
         //when
-        val actual: List<Account> = accountRepo.findAllAccounts().toList()
+        val actual: List<Account> = accountRepo.findAll().toList()
 
         //then
         TestUtils.assertContains(actual, expected)

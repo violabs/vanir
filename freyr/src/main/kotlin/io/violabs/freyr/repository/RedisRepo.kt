@@ -1,5 +1,8 @@
 package io.violabs.freyr.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -9,8 +12,34 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 
 typealias RedisOps<T> = ReactiveRedisOperations<String, T>
 
-abstract class RedisRepo<T>(factory: ReactiveRedisConnectionFactory, klass: Class<T>) {
+abstract class RedisRepo<T : Any>(factory: ReactiveRedisConnectionFactory, klass: Class<T>) {
     protected var operations: RedisOps<T> = createRedisOps(factory, klass)
+
+    suspend fun save(item: T, id: String?): Boolean =
+        operations
+            .opsForValue()
+            .set(id ?: throw Exception("Missing id!!"), item)
+            .awaitSingleOrNull()
+            ?: false
+
+    suspend fun findById(id: String): T? =
+        operations
+            .opsForValue()
+            .get(id)
+            .awaitSingleOrNull()
+
+    fun findAll(): Flow<T> =
+        operations
+            .keys("*")
+            .flatMap { operations.opsForValue().get(it) }
+            .asFlow()
+
+    suspend fun deleteById(id: String): Boolean =
+        operations
+            .opsForValue()
+            .delete(id)
+            .awaitSingleOrNull()
+            ?: false
 
     companion object {
         fun <T> createRedisOps(factory: ReactiveRedisConnectionFactory, klass: Class<T>): RedisOps<T> {

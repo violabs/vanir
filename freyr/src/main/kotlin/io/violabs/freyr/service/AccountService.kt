@@ -14,17 +14,22 @@ class AccountService(
     suspend fun saveAccount(user: AppUser, accountProvider: suspend (String, Long) -> Account?): Account? {
         val userId = user.id ?: return null
 
-        val accountId: String =
-            uuidGenerator
-                .generate(userId.toString())
-                .toString()
+        val accountId: String = generateAccountIdByUserId(userId)
 
         val account: Account = accountProvider(accountId, userId) ?: return null
 
-        val saved: Boolean = accountRepo.saveAccount(account)
+        val saved: Boolean = accountRepo.save(account)
 
         if (saved) return account
 
         return null
     }
+
+    suspend fun deleteAccountByUserId(userId: Long): Boolean {
+        val accountId: String = generateAccountIdByUserId(userId)
+
+        return accountRepo.deleteById(accountId)
+    }
+
+    private fun generateAccountIdByUserId(userId: Long): String = uuidGenerator.generate(userId.toString()).toString()
 }
