@@ -1,31 +1,35 @@
 package io.violabs.freyr.service
 
+import io.violabs.freyr.config.UuidGenerator
 import io.violabs.freyr.domain.Account
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.redis.core.ReactiveRedisOperations
+import io.violabs.freyr.domain.AppUser
+import io.violabs.freyr.repository.AccountRepo
 import org.springframework.stereotype.Service
 
 @Service
-class AccountService(private val accountRedisOps: ReactiveRedisOperations<String, Account>) {
+class AccountService(
+    private val accountRepo: AccountRepo,
+    private val uuidGenerator: UuidGenerator
+) {
+    suspend fun saveAccount(user: AppUser, accountProvider: suspend (String, Long) -> Account?): Account? {
+        val userId = user.id ?: return null
 
-        suspend fun saveAccount(account: Account): Boolean {
-            val id: String = account.id ?: throw Exception("Missing Id!!")
+        val accountId: String = generateAccountIdByUserId(userId)
 
-            return accountRedisOps.opsForValue().set(id, account).awaitSingleOrNull() ?: false
-        }
+        val account: Account = accountProvider(accountId, userId) ?: return null
 
-        suspend fun findAccountById(id: String): Account? {
-            return accountRedisOps.opsForValue().get(id).awaitSingleOrNull()
-        }
+        val saved: Boolean = accountRepo.save(account)
 
-        suspend fun deleteAccountById(id: String): Boolean {
-            return accountRedisOps.opsForValue().delete(id).awaitSingle() ?: false
-        }
+        if (saved) return account
 
-        fun findAllAccounts(): Flow<Account> {
-            return accountRedisOps.keys("*").flatMap { accountRedisOps.opsForValue().get(it) }.asFlow()
-        }
+        return null
+    }
+
+    suspend fun deleteAccountByUserId(userId: Long): Boolean {
+        val accountId: String = generateAccountIdByUserId(userId)
+
+        return accountRepo.deleteById(accountId)
+    }
+
+    private fun generateAccountIdByUserId(userId: Long): String = uuidGenerator.generate(userId.toString()).toString()
 }
