@@ -30,7 +30,7 @@ class OrderRepoIntegrationTest(
 
     private val now = Instant.now()
     private val sharedUuid = UUID.nameUUIDFromBytes("test".toByteArray()).toString()
-    private val sharedOrder = Order(sharedUuid, 1, 1, now.toString())
+    private val sharedOrder = Order(sharedUuid, "1", 1, now.toString())
 
     @BeforeEach
     fun setup() = runBlocking {
@@ -116,7 +116,7 @@ class OrderRepoIntegrationTest(
         //given
         createOrder()
         val uuid2 = UUID.nameUUIDFromBytes("test2".toByteArray()).toString()
-        val order2 = Order(uuid2, 2, 2, now.toString())
+        val order2 = Order(uuid2, "2", 2, now.toString())
         createOrder(uuid2, order2)
 
         //when
