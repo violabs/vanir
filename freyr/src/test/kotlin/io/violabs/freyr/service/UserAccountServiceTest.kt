@@ -18,6 +18,8 @@ class UserAccountServiceTest {
 
     private val userAccountService = UserAccountService(accountRepo, accountService, userClient)
 
+    private val action = FreyrTestVariables.USER_MESSAGE_ACTION
+
     @AfterEach
     fun tearDown() {
         confirmVerified(accountRepo, userClient)
@@ -26,93 +28,81 @@ class UserAccountServiceTest {
     @Test
     fun `createAccount should return null when userClient returns null`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
-        coEvery { userClient.fetchUser(userMessage) } returns null
+        coEvery { userClient.fetchUser(action) } returns null
 
         // when
-        val result = userAccountService.createAccount(userMessage)
+        val result = userAccountService.createAccount(action)
 
         // then
-        assert(result == null)
-        coVerify(exactly = 1) { userClient.fetchUser(userMessage) }
+        assert(result == action)
+        coVerify(exactly = 1) { userClient.fetchUser(action) }
     }
 
     @Test
     fun `createAccount should return account when userClient returns user`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
         val user = FreyrTestVariables.USER
-        coEvery { userClient.fetchUser(userMessage) } returns user
-        coEvery { accountService.saveAccount(user, any()) } returns FreyrTestVariables.NEW_ACCOUNT
+        coEvery { userClient.fetchUser(action) } returns user
+        coEvery { accountService.saveAccount(action, any()) } returns action
 
         // when
-        val result = userAccountService.createAccount(userMessage)
+        val result = userAccountService.createAccount(action)
 
         // then
-        assert(result == FreyrTestVariables.NEW_ACCOUNT)
-        coVerify(exactly = 1) { userClient.fetchUser(userMessage) }
-        coVerify(exactly = 1) { accountService.saveAccount(user, any()) }
+        assert(result == action)
+        coVerify(exactly = 1) { userClient.fetchUser(action) }
+        coVerify(exactly = 1) { accountService.saveAccount(action, any()) }
     }
 
     @Test
     fun `updateAccount should return null when userClient returns null`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
-        coEvery { userClient.fetchUser(userMessage) } returns null
+        coEvery { userClient.fetchUser(action) } returns null
 
         // when
-        val result = userAccountService.updateAccount(userMessage)
+        userAccountService.updateAccount(action)
 
         // then
-        assert(result == null)
-        coVerify(exactly = 1) { userClient.fetchUser(userMessage) }
+        coVerify(exactly = 1) { userClient.fetchUser(action) }
     }
 
     // todo swap out for new user
     @Test
     fun `updateAccount should return account when userClient returns user`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
         val user = FreyrTestVariables.USER
-        coEvery { userClient.fetchUser(userMessage) } returns user
-        coEvery { accountService.saveAccount(user, any()) } returns FreyrTestVariables.NEW_ACCOUNT
+        coEvery { userClient.fetchUser(action) } returns user
+        coEvery { accountService.saveAccount(action, any()) } returns action
 
         // when
-        val result = userAccountService.updateAccount(userMessage)
+        val result = userAccountService.updateAccount(action)
 
         // then
-        assert(result == FreyrTestVariables.NEW_ACCOUNT)
-        coVerify(exactly = 1) { userClient.fetchUser(userMessage) }
-        coVerify(exactly = 1) { accountService.saveAccount(user, any()) }
+        coVerify(exactly = 1) { userClient.fetchUser(action) }
+        coVerify(exactly = 1) { accountService.saveAccount(action, any()) }
     }
 
     @Test
     fun `deleteAccount should return true when accountService returns true`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
-        val userId = userMessage.userId
-        coEvery { accountService.deleteAccountByUserId(userId) } returns true
+        coEvery { accountService.deleteAccountByUserId(action) } returns action
 
         // when
-        val result = userAccountService.deleteAccount(userMessage)
+        userAccountService.deleteAccount(action)
 
         // then
-        assert(result)
-        coVerify(exactly = 1) { accountService.deleteAccountByUserId(userId) }
+        coVerify(exactly = 1) { accountService.deleteAccountByUserId(action) }
     }
 
     @Test
     fun `deleteAccount should return false when accountService returns false`() = runBlocking {
         // given
-        val userMessage = FreyrTestVariables.USER_MESSAGE
-        val userId = userMessage.userId
-        coEvery { accountService.deleteAccountByUserId(userId) } returns false
+        coEvery { accountService.deleteAccountByUserId(action) } returns action
 
         // when
-        val result = userAccountService.deleteAccount(userMessage)
+        userAccountService.deleteAccount(action)
 
         // then
-        assert(!result)
-        coVerify(exactly = 1) { accountService.deleteAccountByUserId(userId) }
+        coVerify(exactly = 1) { accountService.deleteAccountByUserId(action) }
     }
 }

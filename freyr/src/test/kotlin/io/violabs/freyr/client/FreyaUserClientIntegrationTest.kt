@@ -36,7 +36,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        assertThrows<WebClientResponseException.NotFound> { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
+        assertThrows<WebClientResponseException.NotFound> { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE_ACTION) }
         server.takeRequest()
     }
 
@@ -50,7 +50,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
+        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE_ACTION) }
 
         //then
         Assertions.assertNull(actual)
@@ -90,7 +90,7 @@ class FreyaUserClientIntegrationTest(@Autowired private val freyaUserClient: Fre
         )
 
         //when
-        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE) }
+        val actual: AppUser? = runBlocking { freyaUserClient.fetchUser(FreyrTestVariables.USER_MESSAGE_ACTION) }
 
         //then
         TestUtils.assertEquals(expected, actual)

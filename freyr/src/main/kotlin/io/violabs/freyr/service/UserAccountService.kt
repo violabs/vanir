@@ -1,8 +1,8 @@
 package io.violabs.freyr.service
 
-import io.violabs.core.domain.UserMessage
 import io.violabs.freyr.client.FreyaUserClient
 import io.violabs.freyr.domain.Account
+import io.violabs.freyr.domain.UserAccountAction
 import io.violabs.freyr.repository.AccountRepo
 import org.springframework.stereotype.Service
 
@@ -12,33 +12,26 @@ class UserAccountService(
     private val accountService: AccountService,
     private val userClient: FreyaUserClient
 ) {
-    suspend fun createAccount(message: UserMessage): Account? {
-        val user = userClient.fetchUser(message) ?: return null
+    suspend fun createAccount(action: UserAccountAction): UserAccountAction {
+        action.user = userClient.fetchUser(action) ?: return action
 
-        return accountService.saveAccount(user) { accountId, userId ->
+        return accountService.saveAccount(action) { accountId ->
             Account(
                 id = accountId,
-                userId = userId,
-                userDetails = user
+                userId = action.userId,
+                userDetails = action.user
             )
-        }
+        } ?: throw Exception("Account not saved $action")
     }
 
-    suspend fun updateAccount(userMessage: UserMessage): Account? {
-        val user = userClient.fetchUser(userMessage) ?: return null
+    suspend fun updateAccount(action: UserAccountAction): UserAccountAction {
+        action.user = userClient.fetchUser(action) ?: return action
 
-        return accountService.saveAccount(user) { accountId, _ -> accountRepo.findById(accountId) }
+        return accountService
+            .saveAccount(action) { accountId -> accountRepo.findById(accountId) }
+            ?: throw Exception("Account not saved $action")
     }
 
-    suspend fun deleteAccount(userMessage: UserMessage): Boolean {
-        val userId = userMessage.userId
-
-        return accountService.deleteAccountByUserId(userId)
-    }
-
-    suspend fun deactivateAccount(userMessage: UserMessage): Boolean {
-        // todo
-
-        return false
-    }
+    suspend fun deleteAccount(action: UserAccountAction): UserAccountAction =
+        accountService.deleteAccountByUserId(action)
 }

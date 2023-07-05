@@ -41,6 +41,14 @@ abstract class RedisRepo<T : Any>(factory: ReactiveRedisConnectionFactory, klass
             .awaitSingleOrNull()
             ?: false
 
+    suspend fun deleteAll(): Boolean =
+        operations
+            .keys("*")
+            .flatMap { operations.opsForValue().delete(it) }
+            .reduce { a, b -> a && b }
+            .awaitSingleOrNull()
+            ?: false
+
     companion object {
         fun <T> createRedisOps(factory: ReactiveRedisConnectionFactory, klass: Class<T>): RedisOps<T> {
             val serializer: Jackson2JsonRedisSerializer<T> = Jackson2JsonRedisSerializer(klass)

@@ -27,6 +27,9 @@ import reactor.kafka.receiver.ReceiverOptions
 import reactor.kafka.sender.SenderOptions
 import java.util.function.Supplier
 
+typealias UserConsumerTemplate = ReactiveKafkaConsumerTemplate<String, UserMessage>
+typealias OrderProducerTemplate = ReactiveKafkaProducerTemplate<String, OrderMessage>
+
 @Configuration
 open class KafkaConfig {
     @Value("\${spring.kafka.bootstrap-servers:localhost:29092,localhost:39092}")
@@ -82,14 +85,14 @@ open class KafkaConfig {
     }
 
     @Bean
-    open fun userConsumerTemplate(): ReactiveKafkaConsumerTemplate<String, UserMessage> {
+    open fun userConsumerTemplate(): UserConsumerTemplate {
         return userConsumerConfigs()
             .let { ReceiverOptions.create<String, UserMessage>(it).subscription(listOf(userTopicString)) }
             .let { ReactiveKafkaConsumerTemplate(it) }
     }
 
     @Bean
-    open fun orderProducerTemplate(): ReactiveKafkaProducerTemplate<String, OrderMessage> {
+    open fun orderProducerTemplate(): OrderProducerTemplate {
         return producerConfigs()
             .let { SenderOptions.create<String, OrderMessage>(it) }
             .let { ReactiveKafkaProducerTemplate(it) }

@@ -4,9 +4,10 @@ import io.mockk.*
 import io.violabs.freyr.FreyrTestVariables.ACCOUNT_UUID
 import io.violabs.freyr.FreyrTestVariables.NEW_ACCOUNT
 import io.violabs.freyr.FreyrTestVariables.USER
+import io.violabs.freyr.FreyrTestVariables.USER_MESSAGE_ACTION
 import io.violabs.freyr.config.UuidGenerator
 import io.violabs.freyr.domain.Account
-import io.violabs.freyr.domain.AppUser
+import io.violabs.freyr.domain.UserAccountAction
 import io.violabs.freyr.repository.AccountRepo
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -25,47 +26,48 @@ class AccountServiceTest {
 
     //region saveAccount
     @Test
-    fun `saveAccount will return null if id is missing`() = runBlocking {
+    fun `saveAccount will return null if account is missing`() = runBlocking {
         //given
-        val user = AppUser()
+        every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
 
         //when
-        val actual: Account? = accountService.saveAccount(user) { _, _ -> null }
+        val actual: UserAccountAction? = accountService.saveAccount(USER_MESSAGE_ACTION) { _ -> null }
 
         //then
         assert(actual == null)
+        verify { uuidGenerator.generate(USER.id.toString()) }
     }
 
     @Test
     fun `saveAccount will return null if account was not saved`() = runBlocking {
         //given
-        val accountProvider: suspend (String, Long) -> Account? = { _, _ -> NEW_ACCOUNT }
+        val accountProvider: suspend (String) -> Account? = { _ -> NEW_ACCOUNT }
         every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
         coEvery { accountRepo.save(NEW_ACCOUNT) } returns false
 
         //when
-        val actual: Account? = accountService.saveAccount(USER, accountProvider)
+        val actual: UserAccountAction? = accountService.saveAccount(USER_MESSAGE_ACTION, accountProvider)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
         coVerify { accountRepo.save(NEW_ACCOUNT) }
-        assert(actual == null)
+        assert(actual == USER_MESSAGE_ACTION)
     }
 
     @Test
     fun `saveAccount will return account if account was saved`() = runBlocking {
         //given
-        val accountProvider: suspend (String, Long) -> Account? = { _, _ -> NEW_ACCOUNT }
+        val accountProvider: suspend (String) -> Account? = { _ -> NEW_ACCOUNT }
         every { uuidGenerator.generate(USER.id.toString()) } returns ACCOUNT_UUID
         coEvery { accountRepo.save(NEW_ACCOUNT) } returns true
 
         //when
-        val actual: Account? = accountService.saveAccount(USER, accountProvider)
+        val actual: UserAccountAction? = accountService.saveAccount(USER_MESSAGE_ACTION, accountProvider)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
         coVerify { accountRepo.save(NEW_ACCOUNT) }
-        assert(actual == NEW_ACCOUNT)
+        assert(actual == USER_MESSAGE_ACTION.copy(account = NEW_ACCOUNT, saved = true))
     }
     //endregion saveAccount
 
@@ -77,12 +79,12 @@ class AccountServiceTest {
         coEvery { accountRepo.deleteById(ACCOUNT_UUID.toString()) } returns false
 
         //when
-        val actual: Boolean = accountService.deleteAccountByUserId(USER.id!!)
+        val actual: UserAccountAction = accountService.deleteAccountByUserId(USER_MESSAGE_ACTION)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
         coVerify { accountRepo.deleteById(ACCOUNT_UUID.toString()) }
-        assert(!actual)
+        assert(actual.deleted == false)
     }
 
     @Test
@@ -92,12 +94,12 @@ class AccountServiceTest {
         coEvery { accountRepo.deleteById(ACCOUNT_UUID.toString()) } returns true
 
         //when
-        val actual: Boolean = accountService.deleteAccountByUserId(USER.id!!)
+        val actual: UserAccountAction = accountService.deleteAccountByUserId(USER_MESSAGE_ACTION)
 
         //then
         verify { uuidGenerator.generate(USER.id.toString()) }
         coVerify { accountRepo.deleteById(ACCOUNT_UUID.toString()) }
-        assert(actual)
+        assert(actual.deleted == true)
     }
     //endregion deleteAccountByUserId
 }
