@@ -12,9 +12,12 @@ open class AppConfig {
 }
 
 class UuidGenerator {
-    fun generate(seed: String? = null): UUID =
+    fun generate(seed: Any? = null): UUID =
         seed
+            ?.toString()
             ?.toByteArray()
             ?.let(UUID::nameUUIDFromBytes)
             ?: UUID.randomUUID()
+
+    fun generateString(seed: Any? = null): String = generate(seed).toString()
 }
