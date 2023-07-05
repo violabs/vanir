@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 typealias RedisOps<T> = ReactiveRedisOperations<String, T>
 
 abstract class RedisRepo<T : Any>(factory: ReactiveRedisConnectionFactory, klass: Class<T>) {
-    protected var operations: RedisOps<T> = createRedisOps(factory, klass)
+    private var operations: RedisOps<T> = createRedisOps(factory, klass)
 
     suspend fun save(item: T, id: String?): Boolean =
         operations

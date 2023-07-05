@@ -22,7 +22,7 @@ class UserProducerIntegrationTest(
     @Test
     fun `should send user data to kafka`() = runBlocking {
         val user = AppUser(1, "test", "test", "test", "test")
-        val message = UserMessage(1, "localhost:8080/user/1")
+        val message = UserMessage(1, "localhost:8080/user/1", UserMessage.Type.USER_CREATED)
         userProducer.sendUserData(user)
         delay(2000)
         val receivedMessage = withTimeoutOrNull(15_000) { userKafkaConsumer.consume() }

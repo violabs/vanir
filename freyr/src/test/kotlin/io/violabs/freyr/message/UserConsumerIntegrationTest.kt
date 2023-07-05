@@ -4,7 +4,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.coEvery
 import io.violabs.core.domain.UserMessage
 import io.violabs.freyr.KafkaTestConfig
-import io.violabs.freyr.RedisTestConfig
 import io.violabs.freyr.domain.UserAccountAction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -18,26 +17,26 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
 @SpringBootTest(properties = ["app.kafka.user-topic=user-test-1"])
-@Import(
-    KafkaTestConfig::class,
-    RedisTestConfig::class,
-    UserConsumerIntegrationTest.TopicConfig::class
-)
+@Import(KafkaTestConfig::class, UserConsumerIntegrationTest.TopicConfig::class)
 class UserConsumerIntegrationTest(
     @Autowired private val userConsumer: UserConsumer,
-    @Autowired private val userProducer: KafkaTestConfig.UserProducer,
-    @Autowired private val testDatabaseSeeder: RedisTestConfig.TestDatabaseSeeder,
+    @Autowired private val userProducer: KafkaTestConfig.UserProducer
 ) {
     @MockkBean
     private lateinit var userHandler: UserHandler
 
     @Test
     fun `should consume user data from kafka`() = runBlocking {
-        testDatabaseSeeder.seedAccount()
+        //given
         val userMessage = UserMessage(1, "test", UserMessage.Type.USER_CREATED)
         val userAccountAction = UserAccountAction(userMessage, saved = true)
+
         coEvery { userHandler.handleUserMessage(userMessage) } returns userAccountAction
+
+        //when
         userProducer.send(TOPIC, userMessage)
+
+        //then
         delay(5000)
         val action = withTimeoutOrNull(30_000) { userConsumer.consume() }
         assert(action != null)
