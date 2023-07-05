@@ -2,7 +2,7 @@ package io.violabs.freyr.service
 
 import io.violabs.freyr.config.UuidGenerator
 import io.violabs.freyr.domain.Account
-import io.violabs.freyr.domain.AppUser
+import io.violabs.freyr.domain.UserAccountAction
 import io.violabs.freyr.repository.AccountRepo
 import org.springframework.stereotype.Service
 
@@ -11,24 +11,29 @@ class AccountService(
     private val accountRepo: AccountRepo,
     private val uuidGenerator: UuidGenerator
 ) {
-    suspend fun saveAccount(user: AppUser, accountProvider: suspend (String, Long) -> Account?): Account? {
-        val userId = user.id ?: return null
 
-        val accountId: String = generateAccountIdByUserId(userId)
+    suspend fun saveAccount(
+        action: UserAccountAction,
+        accountProvider: suspend (accountId: String) -> Account?
+    ): UserAccountAction? {
+        val userId = action.userMessage.userId
 
-        val account: Account = accountProvider(accountId, userId) ?: return null
+        action.accountId = generateAccountIdByUserId(userId)
 
-        val saved: Boolean = accountRepo.save(account)
+        action.account = accountProvider(action.accountIdNotNull()) ?: return null
 
-        if (saved) return account
+        val saved: Boolean = accountRepo.save(action.account!!)
 
-        return null
+        return action.also { it.saved = saved }
     }
 
-    suspend fun deleteAccountByUserId(userId: Long): Boolean {
-        val accountId: String = generateAccountIdByUserId(userId)
+    suspend fun deleteAccountByUserId(action: UserAccountAction): UserAccountAction {
+        action.accountId = generateAccountIdByUserId(action.userMessage.userId)
 
-        return accountRepo.deleteById(accountId)
+        return accountRepo.deleteById(action.accountId!!).let {
+            action.deleted = it
+            action
+        }
     }
 
     private fun generateAccountIdByUserId(userId: Long): String = uuidGenerator.generate(userId.toString()).toString()

@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
 @SpringBootTest(properties = ["app.kafka.order-topic=order-test-1"])
-@Import(KafkaTestConfig::class, DatabaseTestConfig::class, OrderConsumerFunctionalTest.TopicConfig::class)
-class OrderConsumerFunctionalTest(
+@Import(KafkaTestConfig::class, DatabaseTestConfig::class, OrderConsumerIntegrationTest.TopicConfig::class)
+class OrderConsumerIntegrationTest(
     @Autowired private val orderConsumer: OrderConsumer,
     @Autowired private val orderKafkaProducer: KafkaTestConfig.OrderKafkaProducer,
     @Autowired private val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder,
