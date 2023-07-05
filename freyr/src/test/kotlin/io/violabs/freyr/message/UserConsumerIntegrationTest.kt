@@ -6,13 +6,10 @@ import io.violabs.core.domain.UserMessage
 import io.violabs.freyr.KafkaTestConfig
 import io.violabs.freyr.RedisTestConfig
 import io.violabs.freyr.domain.UserAccountAction
-import io.violabs.freyr.repository.AccountRepo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.NewTopic
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,22 +24,12 @@ import org.springframework.context.annotation.Import
     UserConsumerIntegrationTest.TopicConfig::class
 )
 class UserConsumerIntegrationTest(
-    @Autowired private val accountRepo: AccountRepo,
     @Autowired private val userConsumer: UserConsumer,
     @Autowired private val userProducer: KafkaTestConfig.UserProducer,
     @Autowired private val testDatabaseSeeder: RedisTestConfig.TestDatabaseSeeder,
-    @Autowired private val adminClient: AdminClient,
-    @Autowired private val userTopic1: NewTopic
 ) {
     @MockkBean
     private lateinit var userHandler: UserHandler
-
-    @BeforeEach
-    fun setup() {
-        adminClient.deleteTopics(listOf(TOPIC))
-        adminClient.createTopics(listOf(userTopic1))
-        runBlocking { accountRepo.deleteAll() }
-    }
 
     @Test
     fun `should consume user data from kafka`() = runBlocking {
