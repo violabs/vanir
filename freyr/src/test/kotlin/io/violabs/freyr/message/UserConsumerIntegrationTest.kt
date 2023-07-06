@@ -42,7 +42,6 @@ class UserConsumerIntegrationTest(
         assert(action!!.saved!!)
     }
 
-
     @TestConfiguration
     open class TopicConfig {
         @Bean
