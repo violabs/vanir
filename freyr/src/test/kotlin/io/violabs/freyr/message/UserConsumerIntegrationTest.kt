@@ -2,7 +2,7 @@ package io.violabs.freyr.message
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.coEvery
-import io.violabs.core.domain.UserMessage
+import io.violabs.freyr.FreyrTestVariables
 import io.violabs.freyr.KafkaTestConfig
 import io.violabs.freyr.domain.UserAccountAction
 import kotlinx.coroutines.delay
@@ -28,13 +28,12 @@ class UserConsumerIntegrationTest(
     @Test
     fun `should consume user data from kafka`() = runBlocking {
         //given
-        val userMessage = UserMessage(1, "test", UserMessage.Type.USER_CREATED)
-        val userAccountAction = UserAccountAction(userMessage, saved = true)
+        val userAccountAction = UserAccountAction(FreyrTestVariables.USER_MESSAGE, saved = true)
 
-        coEvery { userHandler.handleUserMessage(userMessage) } returns userAccountAction
+        coEvery { userHandler.handleUserMessage(FreyrTestVariables.USER_MESSAGE) } returns userAccountAction
 
         //when
-        userProducer.send(TOPIC, userMessage)
+        userProducer.send(TOPIC, FreyrTestVariables.USER_MESSAGE)
 
         //then
         delay(5000)
