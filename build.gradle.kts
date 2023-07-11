@@ -68,6 +68,13 @@ subprojects {
 				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
 				implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
+				val openApiVersion = "1.6.0"
+
+				implementation ( "org.springdoc:springdoc-openapi-data-rest:$openApiVersion" )
+				implementation ( "org.springdoc:springdoc-openapi-ui:$openApiVersion" )
+				implementation ( "org.springdoc:springdoc-openapi-kotlin:$openApiVersion")
+
+
 				annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 				testImplementation("com.github.violabs:wesley:1.1.2")
 				testImplementation("org.springframework.boot:spring-boot-starter-test")

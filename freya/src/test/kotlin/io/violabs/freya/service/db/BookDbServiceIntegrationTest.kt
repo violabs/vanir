@@ -3,8 +3,11 @@ package io.violabs.freya.service.db
 import io.violabs.core.TestUtils
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.TestVariables.Book.BOOK_1
+import io.violabs.freya.TestVariables.Book.BOOK_2
 import io.violabs.freya.TestVariables.Book.PRE_SAVED_BOOK_1
 import io.violabs.freya.domain.Book
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -42,7 +45,7 @@ class BookDbServiceIntegrationTest(
         val found: Book? = bookDbService.getBookById(1)
 
         //then
-        TestUtils.assertEquals(null, found)
+        TestUtils.assertEquals( null, found)
     }
 
     @Test
@@ -55,5 +58,17 @@ class BookDbServiceIntegrationTest(
 
         //then
         TestUtils.assertEquals(BOOK_1.copy(id = 1), found!!)
+    }
+
+    @Test
+    fun `listBooks will return available books`() = runBlocking {
+        //setup
+        testDatabaseSeeder.seedBook()
+
+        //when
+        val books = bookDbService.listBooks()
+
+        //then
+        TestUtils.assertContains(books.toList(), listOf(BOOK_1, BOOK_2))
     }
 }

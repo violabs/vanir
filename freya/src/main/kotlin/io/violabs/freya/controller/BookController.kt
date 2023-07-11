@@ -2,6 +2,7 @@ package io.violabs.freya.controller
 
 import io.violabs.freya.domain.Book
 import io.violabs.freya.service.db.BookDbService
+import kotlinx.coroutines.flow.Flow
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -12,4 +13,7 @@ class BookController(private val bookService: BookDbService) {
 
     @GetMapping("{id}")
     suspend fun getBookById(@PathVariable id: Long): Book? = bookService.getBookById(id)
+
+    @GetMapping
+    fun getBooks(): Flow<Book> = bookService.listBooks()
 }

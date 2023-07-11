@@ -1,4 +1,25 @@
-spring.application.name: freyr
-server.port: 8081
+spring:
+  application:
+    name: freyr
+  data:
+    redis:
+      port: 6379
+      host: localhost
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:39092
+server.port: 8082
 
 management.endpoint.health.enabled: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    groups-order: asc

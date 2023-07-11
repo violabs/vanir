@@ -20,3 +20,11 @@ spring:
     url: r2dbc:postgresql://localhost:5432/freya_db
     username: admin
     password: password
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    groups-order: asc
