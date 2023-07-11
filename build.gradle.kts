@@ -81,6 +81,7 @@ subprojects {
 				testImplementation("io.projectreactor:reactor-test")
 				implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
 				testImplementation("io.mockk:mockk:1.13.5")
+				testImplementation("com.ninja-squad:springmockk:4.0.2")
 				testImplementation("org.springframework.kafka:spring-kafka-test")
 			}
 		}

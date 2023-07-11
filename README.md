@@ -65,8 +65,6 @@ docker compose down -f ./freya/docker-compose.branch.yml
 
 ## Start up docker containers (Freyr)
 
-NOTE: Freyr not yet implemented.
-
 Navigate to the project directory and run `docker compose up`.
 Otherwise you can use the following commands:
 
@@ -94,25 +92,24 @@ Flow - Endpoint to call to reserve a book for
 
 ### All
 * [ ] Docker Kafka (network)
+* [ ] E2E testing with both services
 
 ### Freya
 * [x] Docker Postgres
 * [x] Postgres DB Setup
 * [x] Endpoint
 * [x] Docker Kafka (individual)
-* [ ] Kafka Consumer
-* [x] Kafka Producer
+* [x] Kafka Consumer (Order)
+* [x] Kafka Producer (User)
 * [x] Setup Book
 * [x] Setup Library (UserBooks)
-* [ ] Setup HATEOAS message for kafka to call book.
-* [ ] Setup endpoint to make a book reservation that calls to Freyr for reservation info.
 
 ### Freyr
-* [ ] Docker Redis
+* [x] Docker Redis
 * [x] Endpoint
-* [ ] Docker Kafka (individual)
-* [ ] Kafka Consumer
-* [ ] Kafka Producer
+* [x] Docker Kafka (individual)
+* [x] Kafka Consumer (User)
+* [x] Kafka Producer (Order)
 
 ## References
 
