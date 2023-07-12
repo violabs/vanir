@@ -54,4 +54,22 @@ class BookControllerFunctionalTest(
             .jsonPath("$.title").isEqualTo("Test Book")
             .jsonPath("$.author").isEqualTo("Test Author")
     }
+
+    @Test
+    fun `getBooks will return all books`() {
+        testDatabaseSeeder.seedBook()
+
+        client
+            .get()
+            .uri("/api/books")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$[0].id").isEqualTo(1)
+            .jsonPath("$[0].title").isEqualTo("Test Book")
+            .jsonPath("$[0].author").isEqualTo("Test Author")
+            .jsonPath("$[1].id").isEqualTo(2)
+            .jsonPath("$[1].title").isEqualTo("Test Book 2")
+            .jsonPath("$[1].author").isEqualTo("Test Author 2")
+    }
 }
