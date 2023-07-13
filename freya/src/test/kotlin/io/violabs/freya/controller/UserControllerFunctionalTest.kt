@@ -1,11 +1,15 @@
 package io.violabs.freya.controller
 
+import io.violabs.core.TestUtils
+import io.violabs.core.domain.UserMessage
 import io.violabs.freya.DatabaseTestConfig
+import io.violabs.freya.KafkaTestConfig
 import io.violabs.freya.TestVariables.User.DATE_OF_BIRTH
 import io.violabs.freya.TestVariables.User.JOIN_DATE
 import io.violabs.freya.TestVariables.User.PRE_SAVED_USER_1
 import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -16,15 +20,16 @@ import org.springframework.test.web.reactive.server.WebTestClient
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@Import(DatabaseTestConfig::class)
+@Import(DatabaseTestConfig::class, KafkaTestConfig::class)
 class UserControllerFunctionalTest(
-    @Autowired val client: WebTestClient,
-    @Autowired val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder,
-    @Autowired val userDbService: UserDbService
+    @Autowired private val client: WebTestClient,
+    @Autowired private val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder,
+    @Autowired private val userDbService: UserDbService,
+    @Autowired private val userKafkaConsumer: KafkaTestConfig.UserKafkaConsumer
 ) {
 
     @Test
-    fun `createUser will create a user with an id`() {
+    fun `createUser will create a user with an id`() = runBlocking {
         testDatabaseSeeder.truncateUser()
         client
             .post()
@@ -52,6 +57,11 @@ class UserControllerFunctionalTest(
             .jsonPath("$.email").isEqualTo("testuser@test.com")
             .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
             .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
+
+        val expected = UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
+
+        val receivedMessage = withTimeoutOrNull(10_000) { userKafkaConsumer.consume() }
+        TestUtils.assertEquals(expected, receivedMessage)
     }
 
     @Test

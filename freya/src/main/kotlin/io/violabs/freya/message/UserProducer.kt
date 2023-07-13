@@ -10,7 +10,11 @@ import reactor.kafka.sender.SenderResult
 @Component
 class UserProducer(private val producerTemplate: ReactiveKafkaProducerTemplate<String, UserMessage>) {
     suspend fun sendUserData(user: AppUser): SenderResult<Void>? {
-        val message = UserMessage(user.id!!, "localhost:8080/user/${user.id}", UserMessage.Type.USER_CREATED)
+        val message = UserMessage(
+            userId = user.id!!,
+            uri = "http://localhost:8080/api/users/${user.id}",
+            type = UserMessage.Type.USER_CREATED
+        )
 
         return producerTemplate
             .send("users", user.id.toString(), message)
