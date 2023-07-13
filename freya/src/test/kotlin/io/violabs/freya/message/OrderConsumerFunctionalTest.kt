@@ -4,7 +4,9 @@ import io.violabs.core.TestUtils
 import io.violabs.core.domain.OrderMessage
 import io.violabs.freya.DatabaseTestConfig
 import io.violabs.freya.KafkaTestConfig
+import io.violabs.freya.repository.UserBookRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -25,7 +27,8 @@ class OrderConsumerFunctionalTest(
     @Autowired private val orderKafkaProducer: KafkaTestConfig.OrderKafkaProducer,
     @Autowired private val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder,
     @Autowired private val adminClient: AdminClient,
-    @Autowired private val orderTopic1: NewTopic
+    @Autowired private val orderTopic1: NewTopic,
+    @Autowired private val userBookRepository: UserBookRepository
 ) {
 
     @BeforeEach
@@ -41,7 +44,10 @@ class OrderConsumerFunctionalTest(
         val orderMessage = OrderMessage("1", 1, 3)
         orderKafkaProducer.sendOrderData(topic, orderMessage)
         delay(5000)
-        val ids: List<Long> = withTimeoutOrNull(30_000) { orderConsumer.consume() }!!.toList()
+        withTimeoutOrNull(10_000) { orderConsumer.consume() }
+
+        val ids = userBookRepository.findAll().map { it.id }.toList()
+
         TestUtils.assertEquals(listOf(1L, 2L, 3L), ids)
     }
 
