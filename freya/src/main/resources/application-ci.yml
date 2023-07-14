@@ -1,0 +1,9 @@
+spring:
+  kafka:
+    bootstrap-servers:
+      - freya-kafka-0:29092
+      - freya-kafka-1:39092
+  r2dbc:
+    url: r2dbc:postgresql://freya-postgres:5432/freya_db
+    username: admin
+    password: password
