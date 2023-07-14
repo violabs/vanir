@@ -1,3 +1,7 @@
+app:
+  kafka:
+    order-topic: 'orders'
+
 spring:
   application:
     name: freyr

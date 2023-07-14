@@ -2,8 +2,15 @@ package io.violabs.freyr.controller
 
 import io.violabs.core.TestUtils
 import io.violabs.core.domain.OrderMessage
+import io.violabs.freyr.FreyrTestUtils
 import io.violabs.freyr.KafkaTestConfig
+import io.violabs.freyr.TestKafkaConsumer
+import io.violabs.freyr.TestOrderKafkaProperties
+import io.violabs.freyr.config.AppKafkaProperties
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
+import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.NewTopic
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -15,16 +22,20 @@ import java.util.*
 
 @AutoConfigureWebTestClient
 @Import(KafkaTestConfig::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class OrderControllerFunctionalTest(
     @Autowired private val client: WebTestClient,
-    @Autowired private val orderConsumer: KafkaTestConfig.OrderConsumer
+    @Autowired private val appKafkaProperties: AppKafkaProperties,
+    @Autowired private val adminClient: AdminClient,
+    @Autowired private val testOrderKafkaProperties: TestOrderKafkaProperties
 ) {
-    @Test
-    fun `createOrder will create an order`() = runBlocking {
-        //given
-        val uuid = UUID.nameUUIDFromBytes(1.toString().toByteArray()).toString()
+    val uuid = UUID.nameUUIDFromBytes(1.toString().toByteArray()).toString()
 
+    @Test
+    fun `createOrder will create an order`() = setupKafka(
+        "order-controller-fn-test-create",
+        OrderMessage("$uuid-1", 1, 1)
+    ) {
         client
             .post()
             .uri("/api/orders")
@@ -43,11 +54,31 @@ class OrderControllerFunctionalTest(
             .jsonPath("$.id").isEqualTo("$uuid-1")
             .jsonPath("$.accountId").isEqualTo(uuid)
             .jsonPath("$.bookId").isEqualTo(1)
+    }
 
-        val receivedMessage: OrderMessage? = orderConsumer.consume()
+    private fun setupKafka(
+        topic: String,
+        expectedMessage: OrderMessage,
+        retentionMs: Int = 500,
+        testFn: () -> Unit
+    ): Unit = runBlocking {
+        val kafkaConsumer: TestKafkaConsumer<OrderMessage> = FreyrTestUtils.buildKafkaConsumer(
+            testOrderKafkaProperties.properties,
+            topic
+        )
 
-        val expected = OrderMessage("$uuid-1", 1, 1)
+        appKafkaProperties.orderTopic = topic
 
-        TestUtils.assertEquals(expected, receivedMessage)
+        val newTopic: NewTopic = appKafkaProperties.newOrderTopic()
+
+        newTopic.configs(mapOf("retention.ms" to retentionMs.toString()))
+
+        adminClient.createTopics(listOf(appKafkaProperties.newOrderTopic()))
+
+        testFn()
+
+        val receivedMessage = withTimeoutOrNull(10_000) { kafkaConsumer.consume() }
+        adminClient.deleteTopics(listOf(topic))
+        TestUtils.assertEquals(expectedMessage, receivedMessage)
     }
 }

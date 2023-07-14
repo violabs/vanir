@@ -1,0 +1,3 @@
+app:
+  kafka:
+    order-topic: 'orders-test'
