@@ -13,29 +13,26 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.support.serializer.JsonDeserializer
-import reactor.kafka.receiver.ReceiverOptions
 import reactor.kafka.sender.SenderOptions
 import reactor.kafka.sender.SenderResult
 import java.util.function.Supplier
 
 typealias OrderProducerTemplate = ReactiveKafkaProducerTemplate<String, OrderMessage>
-typealias UserConsumerTemplate = ReactiveKafkaConsumerTemplate<String, UserMessage>
 typealias UserListenerFactory = ConcurrentKafkaListenerContainerFactory<String, UserMessage>
+
+class TestUserKafkaProperties(val properties: Map<String, Any>)
 
 @TestConfiguration
 open class KafkaTestConfig {
     @Value("\${spring.kafka.bootstrap-servers:localhost:29092,localhost:39092}")
     lateinit var bootstrapServers: String
 
-    @Value("\${app.kafka.user-topic:users}")
-    private lateinit var userTopicString: String
-
-    open fun userConsumerConfigs(): Map<String, Any> {
+    @Bean
+    open fun testUserKafkaProps(): TestUserKafkaProperties {
         return KafkaProperties()
             .also {
                 val consumer = it.consumer
@@ -48,6 +45,7 @@ open class KafkaTestConfig {
                 consumer.properties["spring.json.trusted.packages"] = "io.violabs.core.domain"
             }
             .buildConsumerProperties()
+            .let(::TestUserKafkaProperties)
     }
 
     @Bean
@@ -63,18 +61,6 @@ open class KafkaTestConfig {
     }
 
     @Bean
-    open fun userConsumerTemplate(): UserConsumerTemplate {
-        return userConsumerConfigs()
-            .let { ReceiverOptions.create<String, UserMessage>(it).subscription(listOf(userTopicString)) }
-            .let { ReactiveKafkaConsumerTemplate(it) }
-    }
-
-    @Bean
-    open fun userKafkaConsumer(userConsumerTemplate: UserConsumerTemplate): UserKafkaConsumer {
-        return UserKafkaConsumer(userConsumerTemplate)
-    }
-
-    @Bean
     open fun userKafkaListenerContainerFactory(producerConfigs: Map<String, Any>): UserListenerFactory {
         val jsonDeserializer = JsonDeserializer<UserMessage>()
         jsonDeserializer.addTrustedPackages("io.violabs.core.domain")
@@ -82,7 +68,7 @@ open class KafkaTestConfig {
         val keySupplier: Supplier<Deserializer<String>> = Supplier { StringDeserializer() }
         val valueSupplier: Supplier<Deserializer<UserMessage>> = Supplier { jsonDeserializer }
 
-        val consumerFactory = DefaultKafkaConsumerFactory(userConsumerConfigs(), keySupplier, valueSupplier)
+        val consumerFactory = DefaultKafkaConsumerFactory(testUserKafkaProps().properties, keySupplier, valueSupplier)
         val producerFactory = DefaultKafkaProducerFactory<String, Any>(producerConfigs)
         val kafkaTemplate = KafkaTemplate(producerFactory)
         val deadLetterPublishingRecoverer = DeadLetterPublishingRecoverer(kafkaTemplate)
@@ -91,17 +77,6 @@ open class KafkaTestConfig {
         return ConcurrentKafkaListenerContainerFactory<String, UserMessage>()
             .also { it.consumerFactory = consumerFactory }
             .also { it.setCommonErrorHandler(errorHandler) }
-    }
-
-    class UserKafkaConsumer(private val consumerTemplate: UserConsumerTemplate) {
-        suspend fun consume(): UserMessage? {
-            return consumerTemplate
-                .receive()
-                .awaitFirstOrNull()
-                ?.value()
-                ?.also { println("Received user message: $it") }
-                ?: run { println("No user received"); null }
-        }
     }
 
     class OrderKafkaProducer(private val producerTemplate: OrderProducerTemplate) {
