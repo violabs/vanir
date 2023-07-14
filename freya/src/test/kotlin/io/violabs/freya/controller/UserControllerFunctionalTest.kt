@@ -11,6 +11,7 @@ import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.apache.kafka.clients.admin.AdminClient
+import org.apache.kafka.clients.admin.NewTopic
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -30,21 +31,11 @@ class UserControllerFunctionalTest(
     @Autowired private val adminClient: AdminClient,
     @Autowired private val testUserKafkaProps: TestUserKafkaProperties
 ) {
-    private val userMessage = UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
-
     @Test
-    fun `createUser will create a user with an id`() = runBlocking {
-        val tempTopic = "user-controller-fn-test-create"
-
-        val kafkaConsumer: TestKafkaConsumer<UserMessage> = FreyaTestUtils.buildKafkaConsumer(
-            testUserKafkaProps.properties,
-            tempTopic
-        )
-
-        appKafkaProperties.userTopic = tempTopic
-
-        adminClient.createTopics(listOf(appKafkaProperties.newUserTopic()))
-
+    fun `createUser will create a user with an id`(): Unit = setupKafka(
+        "user-controller-fn-test-create",
+        UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
+    ) {
         testDatabaseSeeder.truncateUser()
         client
             .post()
@@ -72,14 +63,13 @@ class UserControllerFunctionalTest(
             .jsonPath("$.email").isEqualTo("testuser@test.com")
             .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
             .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
-
-        val receivedMessage = withTimeoutOrNull(10_000) { kafkaConsumer.consume() }
-        TestUtils.assertEquals(userMessage, receivedMessage)
-//        adminClient.deleteTopics(listOf(appKafkaProperties.userTopic))
     }
 
     @Test
-    fun `updateUser will update a user successfully`() {
+    fun `updateUser will update a user successfully`() = setupKafka(
+        "user-controller-fn-test-update",
+        UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_UPDATED)
+    ) {
         //setup
         val createdId = createUser()
 
@@ -148,7 +138,10 @@ class UserControllerFunctionalTest(
     }
 
     @Test
-    fun `deleteUserById will delete user when it exists`() {
+    fun `deleteUserById will delete user when it exists`() = setupKafka(
+        "user-controller-fn-test-delete",
+        UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_DELETED)
+    ) {
         //setup
         val createdId = createUser()
 
@@ -158,6 +151,14 @@ class UserControllerFunctionalTest(
             .uri("/api/users/$createdId")
             .exchange()
             .expectStatus().is2xxSuccessful
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(createdId)
+            .jsonPath("$.username").isEqualTo("testuser")
+            .jsonPath("$.firstname").isEqualTo("Test")
+            .jsonPath("$.lastname").isEqualTo("User")
+            .jsonPath("$.email").isEqualTo("testuser@test.com")
+            .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
+            .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
     }
 
     private fun createUser(): Long {
@@ -165,5 +166,31 @@ class UserControllerFunctionalTest(
         return runBlocking {
             userDbService.createUser(PRE_SAVED_USER_1).id!!
         }
+    }
+
+    private fun setupKafka(
+        topic: String,
+        expectedMessage: UserMessage,
+        retentionMs: Int = 500,
+        testFn: () -> Unit
+    ): Unit = runBlocking {
+        val kafkaConsumer: TestKafkaConsumer<UserMessage> = FreyaTestUtils.buildKafkaConsumer(
+            testUserKafkaProps.properties,
+            topic
+        )
+
+        appKafkaProperties.userTopic = topic
+
+        val newTopic: NewTopic = appKafkaProperties.newUserTopic()
+
+        newTopic.configs(mapOf("retention.ms" to retentionMs.toString()))
+
+        adminClient.createTopics(listOf(appKafkaProperties.newUserTopic()))
+
+        testFn()
+
+        val receivedMessage = withTimeoutOrNull(10_000) { kafkaConsumer.consume() }
+        adminClient.deleteTopics(listOf(topic))
+        TestUtils.assertEquals(expectedMessage, receivedMessage)
     }
 }

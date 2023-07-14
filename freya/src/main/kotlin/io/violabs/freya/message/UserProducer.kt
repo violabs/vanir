@@ -13,11 +13,11 @@ class UserProducer(
     private val appKafkaProperties: AppKafkaProperties,
     private val producerTemplate: ReactiveKafkaProducerTemplate<String, UserMessage>
 ) {
-    suspend fun sendUserData(user: AppUser): SenderResult<Void>? {
+    suspend fun sendUserData(user: AppUser, type: UserMessage.Type): SenderResult<Void>? {
         val message = UserMessage(
             userId = user.id!!,
             uri = "http://localhost:8080/api/users/${user.id}",
-            type = UserMessage.Type.USER_CREATED
+            type = type
         )
 
         return producerTemplate
