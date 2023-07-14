@@ -34,6 +34,8 @@ allprojects {
 			junitXml.required.set(true)
 		}
 
+		systemProperties["spring.profiles.active"] = "test"
+
 		useJUnitPlatform()
 	}
 

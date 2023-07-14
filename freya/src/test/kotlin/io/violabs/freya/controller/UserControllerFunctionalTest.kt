@@ -2,14 +2,15 @@ package io.violabs.freya.controller
 
 import io.violabs.core.TestUtils
 import io.violabs.core.domain.UserMessage
-import io.violabs.freya.DatabaseTestConfig
-import io.violabs.freya.KafkaTestConfig
+import io.violabs.freya.*
 import io.violabs.freya.TestVariables.User.DATE_OF_BIRTH
 import io.violabs.freya.TestVariables.User.JOIN_DATE
 import io.violabs.freya.TestVariables.User.PRE_SAVED_USER_1
+import io.violabs.freya.config.AppKafkaProperties
 import io.violabs.freya.service.db.UserDbService
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import org.apache.kafka.clients.admin.AdminClient
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -25,11 +26,25 @@ class UserControllerFunctionalTest(
     @Autowired private val client: WebTestClient,
     @Autowired private val testDatabaseSeeder: DatabaseTestConfig.TestDatabaseSeeder,
     @Autowired private val userDbService: UserDbService,
-    @Autowired private val userKafkaConsumer: KafkaTestConfig.UserKafkaConsumer
+    @Autowired private val appKafkaProperties: AppKafkaProperties,
+    @Autowired private val adminClient: AdminClient,
+    @Autowired private val testUserKafkaProps: TestUserKafkaProperties
 ) {
+    private val userMessage = UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
 
     @Test
     fun `createUser will create a user with an id`() = runBlocking {
+        val tempTopic = "user-controller-fn-test-create"
+
+        val kafkaConsumer: TestKafkaConsumer<UserMessage> = FreyaTestUtils.buildKafkaConsumer(
+            testUserKafkaProps.properties,
+            tempTopic
+        )
+
+        appKafkaProperties.userTopic = tempTopic
+
+        adminClient.createTopics(listOf(appKafkaProperties.newUserTopic()))
+
         testDatabaseSeeder.truncateUser()
         client
             .post()
@@ -58,10 +73,9 @@ class UserControllerFunctionalTest(
             .jsonPath("$.dateOfBirth").isEqualTo(DATE_OF_BIRTH.toString())
             .jsonPath("$.joinDate").isEqualTo(JOIN_DATE.toString())
 
-        val expected = UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
-
-        val receivedMessage = withTimeoutOrNull(10_000) { userKafkaConsumer.consume() }
-        TestUtils.assertEquals(expected, receivedMessage)
+        val receivedMessage = withTimeoutOrNull(10_000) { kafkaConsumer.consume() }
+        TestUtils.assertEquals(userMessage, receivedMessage)
+//        adminClient.deleteTopics(listOf(appKafkaProperties.userTopic))
     }
 
     @Test
