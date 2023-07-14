@@ -23,7 +23,7 @@ class UserController(
 
     @PutMapping
     suspend fun updateUser(@RequestBody user: AppUser): AppUser = log("updateUser", user) {
-        userDbService.updateUser(user)
+        userEventService.updateUser(user)
     }
 
     @GetMapping("/{id}")
@@ -37,8 +37,8 @@ class UserController(
     }
 
     @DeleteMapping("/{id}")
-    suspend fun deleteUserById(@PathVariable id: Long): Boolean = log("deleteUserById", id) {
-        userDbService.deleteUserById(id)
+    suspend fun deleteUserById(@PathVariable id: Long): AppUser = log("deleteUserById", id) {
+        userEventService.deleteUserById(id)
     }
 
     private suspend fun <T> log(method: String, parameter: Any? = null, contentFn: suspend () -> T): T {

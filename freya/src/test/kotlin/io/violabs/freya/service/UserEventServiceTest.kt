@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import io.violabs.core.domain.UserMessage
 import io.violabs.freya.TestVariables.User.USER_1
 import io.violabs.freya.message.UserProducer
 import io.violabs.freya.service.db.UserDbService
@@ -24,7 +25,7 @@ class UserEventServiceTest {
         val senderResult = mockk<SenderResult<Void>>()
 
         coEvery { userDbService.createUser(USER_1) } returns USER_1
-        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_CREATED) } returns senderResult
 
         //when
         userEventService.createUser(USER_1)
@@ -32,7 +33,7 @@ class UserEventServiceTest {
         //then
         coVerify {
             userDbService.createUser(USER_1)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_CREATED)
         }
 
         confirmVerified(userDbService, userProducer)
@@ -42,7 +43,7 @@ class UserEventServiceTest {
     fun `createUser will throw an exception if the user is not sent`(): Unit = runBlocking {
         //given
         coEvery { userDbService.createUser(USER_1) } returns USER_1
-        coEvery { userProducer.sendUserData(USER_1) } returns null
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_CREATED) } returns null
 
         //when
         val exception = kotlin.runCatching {
@@ -52,7 +53,7 @@ class UserEventServiceTest {
         //then
         coVerify {
             userDbService.createUser(USER_1)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_CREATED)
         }
 
         confirmVerified(userDbService, userProducer)
@@ -66,7 +67,7 @@ class UserEventServiceTest {
         val senderResult = mockk<SenderResult<Void>>()
 
         coEvery { userDbService.updateUser(USER_1) } returns USER_1
-        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_UPDATED) } returns senderResult
 
         //when
         userEventService.updateUser(USER_1)
@@ -74,7 +75,7 @@ class UserEventServiceTest {
         //then
         coVerify {
             userDbService.updateUser(USER_1)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_UPDATED)
         }
 
         confirmVerified(userDbService, userProducer)
@@ -84,7 +85,7 @@ class UserEventServiceTest {
     fun `updateUser will throw an exception if the user is not sent`(): Unit = runBlocking {
         //given
         coEvery { userDbService.updateUser(USER_1) } returns USER_1
-        coEvery { userProducer.sendUserData(USER_1) } returns null
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_UPDATED) } returns null
 
         //when
         val exception = kotlin.runCatching {
@@ -94,7 +95,7 @@ class UserEventServiceTest {
         //then
         coVerify {
             userDbService.updateUser(USER_1)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_UPDATED)
         }
 
         confirmVerified(userDbService, userProducer)
@@ -135,7 +136,7 @@ class UserEventServiceTest {
 
         coEvery { userDbService.getUserById(id) } returns USER_1
         coEvery { userDbService.deleteUserById(id) } returns true
-        coEvery { userProducer.sendUserData(USER_1) } returns senderResult
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_DELETED) } returns senderResult
 
         //when
         userEventService.deleteUserById(id)
@@ -144,7 +145,7 @@ class UserEventServiceTest {
         coVerify {
             userDbService.getUserById(id)
             userDbService.deleteUserById(id)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_DELETED)
         }
 
         confirmVerified(userDbService, userProducer)
@@ -157,7 +158,7 @@ class UserEventServiceTest {
 
         coEvery { userDbService.getUserById(id) } returns USER_1
         coEvery { userDbService.deleteUserById(id) } returns true
-        coEvery { userProducer.sendUserData(USER_1) } returns null
+        coEvery { userProducer.sendUserData(USER_1, UserMessage.Type.USER_DELETED) } returns null
 
         //when
         val exception = kotlin.runCatching {
@@ -168,7 +169,7 @@ class UserEventServiceTest {
         coVerify {
             userDbService.getUserById(id)
             userDbService.deleteUserById(id)
-            userProducer.sendUserData(USER_1)
+            userProducer.sendUserData(USER_1, UserMessage.Type.USER_DELETED)
         }
 
         confirmVerified(userDbService, userProducer)

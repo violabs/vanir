@@ -39,7 +39,7 @@ class UserProducerFunctionalTest(
         adminClient.createTopics(listOf(appKafkaProperties.newUserTopic()))
         val user = AppUser(1, "test", "test", "test", "test")
         val message = UserMessage(1, "http://localhost:8080/api/users/1", UserMessage.Type.USER_CREATED)
-        userProducer.sendUserData(user)
+        userProducer.sendUserData(user, UserMessage.Type.USER_CREATED)
         val receivedMessage = withTimeoutOrNull(10_000) { kafkaConsumer.consume() }
         TestUtils.assertEquals(message, receivedMessage)
         adminClient.deleteTopics(listOf(appKafkaProperties.userTopic))
