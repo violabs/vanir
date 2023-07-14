@@ -4,6 +4,7 @@ import io.violabs.core.domain.UserMessage
 import io.violabs.freya.config.AppKafkaProperties
 import io.violabs.freya.domain.AppUser
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import mu.KLogging
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Component
 import reactor.kafka.sender.SenderResult
@@ -20,9 +21,17 @@ class UserProducer(
             type = type
         )
 
+        return sendMessage(message)
+    }
+
+    suspend fun sendMessage(message: UserMessage): SenderResult<Void>? {
+        logger.info("Sending message: $message")
+
         return producerTemplate
-            .send(appKafkaProperties.userTopic, user.id.toString(), message)
-            .doOnEach { println("Sent user data: $user") }
+            .send(appKafkaProperties.userTopic, message.userId.toString(), message)
+            .doOnEach { logger.info("Sent message: $message") }
             .awaitSingleOrNull()
     }
+
+    companion object : KLogging()
 }

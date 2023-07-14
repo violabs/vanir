@@ -1,10 +1,12 @@
 package io.violabs.freyr.config
 
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.*
 
 @Configuration
+@ConfigurationPropertiesScan
 open class AppConfig {
 
     @Bean

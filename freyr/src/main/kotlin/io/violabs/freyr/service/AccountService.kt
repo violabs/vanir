@@ -4,6 +4,7 @@ import io.violabs.freyr.config.UuidGenerator
 import io.violabs.freyr.domain.Account
 import io.violabs.freyr.domain.UserAccountAction
 import io.violabs.freyr.repository.AccountRepo
+import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,6 +27,8 @@ class AccountService(
 
         return action.also { it.saved = saved }
     }
+
+    fun listAccounts(): Flow<Account> = accountRepo.findAll()
 
     suspend fun deleteAccountByUserId(action: UserAccountAction): UserAccountAction {
         action.accountId = generateAccountIdByUserId(action.userMessage.userId)
