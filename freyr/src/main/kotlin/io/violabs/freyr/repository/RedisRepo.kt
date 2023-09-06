@@ -12,40 +12,46 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 
 typealias RedisOps<T> = ReactiveRedisOperations<String, T>
 
-abstract class RedisRepo<T : Any>(factory: ReactiveRedisConnectionFactory, klass: Class<T>) {
+abstract class RedisRepo<T : Any>(
+    factory: ReactiveRedisConnectionFactory,
+    klass: Class<T>,
+    private val collectionName: String
+) {
     private var operations: RedisOps<T> = createRedisOps(factory, klass)
+
+    private fun namespaceKey(id: String): String = "$collectionName:$id"
 
     suspend fun save(item: T, id: String?): Boolean =
         operations
             .opsForValue()
-            .set(id ?: throw Exception("Missing id!!"), item)
+            .set(namespaceKey(id ?: throw Exception("Missing id!!")), item)
             .awaitSingleOrNull()
             ?: false
 
     suspend fun findById(id: String): T? =
         operations
             .opsForValue()
-            .get(id)
+            .get(namespaceKey(id))
             .awaitSingleOrNull()
 
     fun findAll(): Flow<T> =
         operations
-            .keys("*")
-            .flatMap { operations.opsForValue().get(it) }
+            .keys("$collectionName:*")
+            .flatMap(operations.opsForValue()::get)
             .asFlow()
 
     suspend fun deleteById(id: String): Boolean =
         operations
             .opsForValue()
-            .delete(id)
+            .delete(namespaceKey(id))
             .awaitSingleOrNull()
             ?: false
 
     suspend fun deleteAll(): Boolean =
         operations
-            .keys("*")
+            .keys("$collectionName:*")
             .flatMap { operations.opsForValue().delete(it) }
-            .reduce { a, b -> a && b }
+            .reduce(Boolean::and)
             .awaitSingleOrNull()
             ?: false
 

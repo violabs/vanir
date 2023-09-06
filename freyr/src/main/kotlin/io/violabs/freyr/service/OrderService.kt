@@ -18,7 +18,7 @@ class OrderService(
         val bookId: Long = orderDetails.bookId
 
         val order = Order(
-            id = "$accountId-$bookId",
+            id = "$accountId:$bookId",
             accountId = accountId,
             bookId = bookId
         )

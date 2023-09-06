@@ -86,6 +86,12 @@ docker compose up -f ./freyr/docker-compose.branch.yml
 docker compose down -f ./freyr/docker-compose.branch.yml
 ```
 
+## Postman
+
+Once this is finalized, I will add postman config under the folder `/postman`
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/28838110-14ac1ab2-4872-4b23-a278-cf6c35bacccd?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D28838110-14ac1ab2-4872-4b23-a278-cf6c35bacccd%26entityType%3Dcollection%26workspaceId%3Db1331932-913f-4060-8ebd-9046f2f99311)
+
 ## TODO
 
 Flow - Endpoint to call to reserve a book for 
@@ -110,6 +116,10 @@ Flow - Endpoint to call to reserve a book for
 * [x] Docker Kafka (individual)
 * [x] Kafka Consumer (User)
 * [x] Kafka Producer (Order)
+
+## Design
+
+![img.png](assets/img.png)
 
 ## References
 
