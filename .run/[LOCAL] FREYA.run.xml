@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="FREYA" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="[LOCAL] FREYA" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="vanir.freya.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="io.violabs.freya.ApplicationKt" />
     <method v="2">

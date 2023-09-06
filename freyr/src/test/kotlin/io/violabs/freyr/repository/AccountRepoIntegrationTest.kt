@@ -131,11 +131,11 @@ class AccountRepoIntegrationTest(
     private suspend fun createAccount(account: Account): Account {
         accountRedisOps
             .opsForValue()
-            .set(account.id!!, account)
+            .set(makeId(account.id!!), account)
             .awaitSingleOrNull() ?: throw Exception("Was not able to save $account")
 
         return account
     }
 
-
+    private fun makeId(uuid: String): String = "account:$uuid"
 }

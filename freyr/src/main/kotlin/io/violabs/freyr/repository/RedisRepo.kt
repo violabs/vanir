@@ -3,6 +3,7 @@ package io.violabs.freyr.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import mu.KLogging
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -37,7 +38,9 @@ abstract class RedisRepo<T : Any>(
     fun findAll(): Flow<T> =
         operations
             .keys("$collectionName:*")
+            .doOnNext { logger.info("Found key: $it") }
             .flatMap(operations.opsForValue()::get)
+            .doOnNext { logger.info("Found value: $it") }
             .asFlow()
 
     suspend fun deleteById(id: String): Boolean =
@@ -55,7 +58,7 @@ abstract class RedisRepo<T : Any>(
             .awaitSingleOrNull()
             ?: false
 
-    companion object {
+    companion object : KLogging() {
         fun <T> createRedisOps(factory: ReactiveRedisConnectionFactory, klass: Class<T>): RedisOps<T> {
             val serializer: Jackson2JsonRedisSerializer<T> = Jackson2JsonRedisSerializer(klass)
 

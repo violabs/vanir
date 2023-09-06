@@ -34,7 +34,7 @@ class OrderControllerFunctionalTest(
     @Test
     fun `createOrder will create an order`() = setupKafka(
         "order-controller-fn-test-create",
-        OrderMessage("$uuid-1", 1, 1)
+        OrderMessage("$uuid:1", 1, 1)
     ) {
         client
             .post()
@@ -51,7 +51,7 @@ class OrderControllerFunctionalTest(
             .exchange()
             .expectStatus().isOk
             .expectBody()
-            .jsonPath("$.id").isEqualTo("$uuid-1")
+            .jsonPath("$.id").isEqualTo("$uuid:1")
             .jsonPath("$.accountId").isEqualTo(uuid)
             .jsonPath("$.bookId").isEqualTo(1)
     }

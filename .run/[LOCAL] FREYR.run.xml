@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="FREYR" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="[LOCAL] FREYR" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="vanir.freyr.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="io.violabs.freyr.ApplicationKt" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">

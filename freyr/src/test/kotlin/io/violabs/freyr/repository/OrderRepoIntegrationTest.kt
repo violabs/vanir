@@ -129,7 +129,9 @@ class OrderRepoIntegrationTest(
     private suspend fun createOrder(uuid: String = sharedUuid, order: Order = sharedOrder) {
         orderRedisOps
             .opsForValue()
-            .set(uuid, order)
+            .set(makeId(uuid), order)
             .awaitSingle()
     }
+
+    private fun makeId(uuid: String = sharedUuid): String = "order:$uuid"
 }

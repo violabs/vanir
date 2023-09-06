@@ -39,6 +39,6 @@ class OrderServiceTest {
         verify { uuidGenerator.generateString(orderDetails.userId) }
         coVerify { orderRepo.save(any()) }
         coVerify { orderProducer.sendOrderMessage(orderDetails.userId, order) }
-        TestUtils.assertEquals(order.id, "$accountId-${orderDetails.bookId}")
+        TestUtils.assertEquals(order.id, "$accountId:${orderDetails.bookId}")
     }
 }
