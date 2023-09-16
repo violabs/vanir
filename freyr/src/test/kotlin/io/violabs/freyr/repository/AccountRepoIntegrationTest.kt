@@ -25,7 +25,7 @@ class AccountRepoIntegrationTest(
 ) {
     private val accountRedisOps: RedisOps<Account> = RedisRepo.createRedisOps(factory, Account::class.java)
 
-    private val sharedAccount = Account("1", 1, listOf("abc", "def"))
+    private val sharedAccount = Account("1", 1, mutableListOf("abc", "def"))
 
     @BeforeEach
     fun setup() = runBlocking {
@@ -117,7 +117,7 @@ class AccountRepoIntegrationTest(
     fun `findAll will return list of accounts when accounts exist`() = runBlocking {
         //given
         createAccount(sharedAccount)
-        val account2 = Account("2", 2, listOf("ghi", "jkl"))
+        val account2 = Account("2", 2, mutableListOf("ghi", "jkl"))
         createAccount(account2)
         val expected = listOf(sharedAccount, account2)
 

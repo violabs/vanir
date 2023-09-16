@@ -34,8 +34,6 @@ services:
       - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=vanir-kafka-1:9092
       - KAFKA_CLUSTERS_1_ZOOKEEPER=vanir-zookeeper-1:2181
       - DYNAMIC_CONFIG_ENABLED=true
-    volumes:
-      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
 
   vanir-zookeeper-0:
     image: confluentinc/cp-zookeeper:latest

@@ -28,6 +28,18 @@ class AccountService(
         return action.also { it.saved = saved }
     }
 
+    suspend fun addOrderToAccount(userId: Long, orderId: String): Boolean {
+        return getAccountByUserId(userId)
+            ?.let { account ->
+                account.addOrderId(orderId)
+                accountRepo.save(account)
+            }
+            ?: false
+    }
+
+    suspend fun getAccountByUserId(userId: Long): Account? =
+        accountRepo.findById(generateAccountIdByUserId(userId))
+
     fun listAccounts(): Flow<Account> = accountRepo.findAll()
 
     suspend fun deleteAccountByUserId(action: UserAccountAction): UserAccountAction {

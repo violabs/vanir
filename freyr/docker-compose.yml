@@ -24,8 +24,6 @@ services:
       - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=freyr-kafka-1:9092
       - KAFKA_CLUSTERS_1_ZOOKEEPER=freyr-zookeeper-1:2181
       - DYNAMIC_CONFIG_ENABLED=true
-    volumes:
-      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
 
   freyr-zookeeper-0:
     image: confluentinc/cp-zookeeper:latest

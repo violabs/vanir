@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="[LOCAL] VANIR" type="CompoundRunConfigurationType">
-    <toRun name="vanir-docker-up.sh" type="ShConfigurationType" />
-    <toRun name="FREYA" type="SpringBootApplicationConfigurationType" />
-    <toRun name="FREYR" type="SpringBootApplicationConfigurationType" />
+    <toRun name="vanir" type="docker-deploy" />
+    <toRun name="[LOCAL] FREYA" type="SpringBootApplicationConfigurationType" />
+    <toRun name="[LOCAL] FREYR" type="SpringBootApplicationConfigurationType" />
     <method v="2" />
   </configuration>
 </component>
